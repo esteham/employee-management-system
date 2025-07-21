@@ -30,7 +30,7 @@ CREATE TABLE attendance (
     		is_holiday BOOLEAN DEFAULT 0,
     		late_fine DECIMAL(10,2) DEFAULT 0,
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    		UNIQUE KEY (employee_id, DATE),
+    		UNIQUE KEY (employee_id, date),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 			);
 
@@ -49,4 +49,14 @@ CREATE TABLE payroll (
     		UNIQUE KEY uk_emp_month_year(employee_id, month, year),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
     		CONSTRAINT chk_month CHECK (month BETWEEN 1 AND 12)
+			);
+
+CREATE TABLE salary_structure (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+    		employee_id INT UNIQUE NOT NULL,
+			basic_salary DECIMAL(10,2) NOT NULL,
+		    overtime_rate DECIMAL(10,2) DEFAULT 0,
+    		bonus_allowed BOOLEAN DEFAULT 0,
+    		effective_from DATE NOT NULL,
+    		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 			);

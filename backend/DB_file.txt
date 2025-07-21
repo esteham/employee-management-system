@@ -8,3 +8,14 @@ CREATE TABLE employees (
     		status ENUM('active','inactive') DEFAULT 'active',
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 			);
+
+CREATE TABLE users (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+    		user_name VARCHAR(100) UNIQUE NOT NULL,
+    		password VARCHAR(255) NOT NULL,
+    		roll ENUM('admin','hr','employee') NOT NULL DEFAULT 'employee',
+    		employee_id INT DEFAULT NULL,
+    		status ENUM ('active','inactive') DEFAULT 'active',
+    		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE SET NULL
+			);

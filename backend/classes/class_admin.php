@@ -9,12 +9,13 @@ class Admin
     {
         $host   ='localhost';
         $db     ='ems_db';
-        $user   ='';
-        $pass   ='utf8mb4';
+        $user   ='root';
+        $pass   ='';
+        $charset='utf8mb4';
 
-        $dsn    = 'mysql:host=$host; dbname=$db, charsest=$charset';
+        $dsn    = "mysql:host=$host; dbname=$db; charsest=$charset";
         $options= [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_ECEPTION,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ];
         
@@ -59,6 +60,6 @@ class Admin
         }
     }
 
-    
+
 
 }

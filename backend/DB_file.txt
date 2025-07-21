@@ -33,3 +33,20 @@ CREATE TABLE attendance (
     		UNIQUE KEY (employee_id, DATE),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 			);
+
+CREATE TABLE payroll (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+    		employee_id INT NOT NULL,
+			month TINYINT UNSIGNED NOT NULL,
+    		year YEAR(4) NOT NULL,
+    		basic_salary DECIMAL(10,2) NOT NULL,
+    		bonus DECIMAL(10,2) DEFAULT 0,
+    		overtime DECIMAL(10,2) DEFAULT 0,
+    		deduction DECIMAL(10,2) DEFAULT 0,
+    		late_fine DECIMAL(10,2) DEFAULT 0,
+    		net_salary DECIMAL (10,2),
+    		generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    		UNIQUE KEY uk_emp_month_year(employee_id, month, year),
+    		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    		CONSTRAINT chk_month CHECK (month BETWEEN 1 AND 12)
+			);

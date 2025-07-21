@@ -60,3 +60,12 @@ CREATE TABLE salary_structure (
     		effective_from DATE NOT NULL,
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 			);
+
+CREATE TABLE login_rules (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+    		employee_id INT UNIQUE NOT NULL,
+			login_time TIME NOT NULL,
+    		grace_period_minutes INT DEFAULT 2,
+    		fine_per_day DECIMAL(10,2),
+    		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+			);

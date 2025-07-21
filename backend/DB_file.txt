@@ -88,3 +88,8 @@ CREATE TABLE holidays (
     		holiday_date DATE UNIQUE NOT NULL,
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 			);
+
+CREATE TABLE weekends (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			day_of_week ENUM('Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday') UNIQUE
+			);

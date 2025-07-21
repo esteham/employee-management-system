@@ -69,3 +69,15 @@ CREATE TABLE login_rules (
     		fine_per_day DECIMAL(10,2),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 			);
+
+CREATE TABLE late_fines (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+    		employee_id INT,
+			attendance_id INT,
+    		date DATE,
+    		fine_amount DECIMAL(10,2),
+    		reason VARCHAR(255) DEFAULT 'Late Attendence',
+    		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    		FOREIGN KEY (attendance_id) REFERENCES attendance(id) ON DELETE CASCADE
+			);

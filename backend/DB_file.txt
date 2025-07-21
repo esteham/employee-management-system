@@ -1,0 +1,10 @@
+CREATE TABLE employees (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+    		name VARCHAR(100) NOT NULL,
+    		email VARCHAR(100) UNIQUE,
+    		phone VARCHAR(20),
+    		image VARCHAR(250),
+    		join_date DATE NOT NULL,
+    		status ENUM('active','inactive') DEFAULT 'active',
+    		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			);

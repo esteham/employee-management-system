@@ -18,7 +18,6 @@ if(!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'employee')
 }
 
 require_once '../../classes/class_admin.php';
-
 $admin  = new Admin();
 
 $employeeID = $_SESSION['user']['employee_id'];

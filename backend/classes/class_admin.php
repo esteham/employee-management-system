@@ -52,9 +52,9 @@ class Admin
             return [
                 'success'   =>true,
                 'data'      =>[
-                                'id'            =>$user['id'],
-                                'employee_id'   =>$user['employee_id'],
-                                'role'          =>$user['role']
+                            'id'            =>$user['id'],
+                            'employee_id'   =>$user['employee_id'],
+                            'role'          =>$user['role']
                 ],
             ];
         }
@@ -134,6 +134,34 @@ class Admin
     }
     /* ================
     End Record Attendance
+    =====================*/
+
+    /* ================
+    Check if alreday marked today
+    =====================*/
+    public function checkTodayAttendance($employeeID)
+    {
+        $today  = date('Y-m-d');
+        $stmt   = $this->pdo->prepare("SELECT check_in FROM attendance WHERE employee_id = ? AND date = ?");
+        $stmt   ->execute([$employeeID, $today]);
+
+        if($stmt->rowCount() > 0 )
+        {
+            $row = $stmt->fetch();
+            return [
+                'already_marked'    => true,
+                'check_in'          => $row['check_in'],
+            ];
+
+        }
+
+        return [
+            'already_marked' => false
+        ];
+
+    }
+    /* ================
+    End Check if alreday marked today
     =====================*/
 
 }

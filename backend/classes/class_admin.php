@@ -1,5 +1,4 @@
 <?php
-
 class Admin
 
 {
@@ -75,13 +74,13 @@ class Admin
         $today  = date('Y-m-d');
         $timeNow= date('H:i:s');
 
-        /check iif already marked today
+        //check iif already marked today
         $check = $this->pdo->prepare("SELECT id FROm attendance WHERE employee_id = ? AND date = ?");
         $check->execute([$employeeID, $today]);
 
         if($check->rowCount() > 0)
         {
-            return ['success'=> false, 'massage'=> 'Already marked today']
+            return ['success'=> false, 'massage'=> 'Already marked today'];
         }
 
         //check if today is weekend and holiday
@@ -163,5 +162,45 @@ class Admin
     /* ================
     End Check if alreday marked today
     =====================*/
+
+    /* ================
+    PayrollExists
+    =====================*/
+    public function payrollExists($employeeId, $month, $year)
+	{
+		$stmt = $this->pdo->prepare("SELECT id FROM payroll WHERE employee_id = ? AND month = ? AND year = ?");
+
+		$stmt->execute([$employeeId, $month, $year]);
+
+		return $stmt->rowCount() > 0;
+	}
+
+	public function generatePayroll($employeeId, $month, $year, $bonus = 0, $deduction = 0, $overTimeHours = 0)
+	{
+		$stmt = $this->pdo->prepare("SELECT basic_salary, overtime_rate FROM salary_structure WHERE employee_id = ?");
+		$stmt->execute([$employeeId]);
+		$salaryData = $stmt->fetch();
+
+		if(!$salaryData)
+		{
+			return ['success' => false, 'message' => 'Salary structure not found'];
+		}
+
+		$basicSalary = $salaryData['basic_salary'];
+		$overtimeRate = $salaryData['overtime_rate'];
+
+		//Count working days and late fines
+
+		$start = "$year-$month-01";
+		$end = date("Y-m-t", strtotime($start));
+
+		$attStmt = $this->pdo->prepare("SELECT COUNT(*) as total_present FROM attendance WHERE employee_id = ? AND date BETWEEN ? AND ? AND is_weekend = 0 AND is_holiday = 0");
+		$attStmt->execute([$employeeId, $start, $end]);
+		$totalPresent = $attStmt->fetch()['total_present'];
+	}
+    /* ================
+    End PayrollExists
+    =====================*/
+
 
 }

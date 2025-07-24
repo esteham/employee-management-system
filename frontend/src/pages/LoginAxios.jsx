@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../api/loginHandler";
+import { loginUser } from "../apiHandler/loginHandler";
 
 const Login = () => {
   const navigate = useNavigate();

@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json');
-session_start();
+require_once '../config/init.php'
 
 if($_SERVER['REQUEST_METHOD'] !== 'GET');
 {

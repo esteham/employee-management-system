@@ -1,10 +1,9 @@
 <?php
-session_start();
-header('Content-Type: application/json');
+require_once '../config/init.php';
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST')
 {
-    echo json_encode(['success'=> false, 'massage'=>'Invalid request methods']);
+    echo json_encode(['success'=> false, 'message'=>'Invalid request methods']);
     exit;
 }
 

@@ -40,7 +40,7 @@ class Admin
     =====================*/
     public function login ($username, $password)
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE username = ? AND status = "active"');
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE username = ? AND status = 'active'");
 
         $stmt->execute([$username]);
         $user = $stmt->fetch();

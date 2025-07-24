@@ -1,6 +1,6 @@
 <?php
 session_start();
-header('Content-Type:  application/json');
+header('Content-Type;  application/json');
 
 //Allow only HR/Admin
 if(!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr']))

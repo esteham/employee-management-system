@@ -197,6 +197,39 @@ class Admin
 		$attStmt = $this->pdo->prepare("SELECT COUNT(*) as total_present FROM attendance WHERE employee_id = ? AND date BETWEEN ? AND ? AND is_weekend = 0 AND is_holiday = 0");
 		$attStmt->execute([$employeeID, $start, $end]);
 		$totalPresent = $attStmt->fetch()['total_present'];
+
+        //Sum of late fine in the month
+        $fineStmt = $this->pdo->prepare("SELECT SUM(fine_amount) as total_fine FROM late_fines WHERE employee_id = ? AND date BETWEEN ? AND ?");
+        $fineStmt ->execute([$employeeID, $start, $end]);
+
+        $totalFine = $fineStmt->fetch()['total_fine'] ?? 0;
+
+        //Overtime payment
+        $overtimePay = $overTimeHours * $overtimeRate;
+
+        //Final Net salary
+        $netSalary = $basicSalary + $bonus + $overtimePay - $deduction - $totalFine;
+        /*add more options like medical,house rent, and some others facilities*/
+
+        //Insert into payroll
+        $insert = $this->pdo-> prepare("INSERT INTO payroll (employee_id, month, year, basic_salary, bonus, overtime, deduction, late_fine, net_salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $insert->execute([$employeeID, $month, $year, $basicSalary, $bonus, $overtimePay, $deduction, $totalFine, $netSalary]);
+
+        return [
+
+                'success'   => true,
+                'message'   => 'Payroll generated successfully',
+                'net_salary'=> $netSalary,
+                'details'   => [
+                        'predent_day'   => $totalPresent,
+                        'overtime'      => $overTimeHours,
+                        'late_fine'     => $totalFine,
+                        'bonus'         => $bonus,
+                        'deduction'     => $deduction
+                ],
+
+            ];
+
 	}
     /* ================
     End PayrollExists

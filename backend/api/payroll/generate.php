@@ -1,6 +1,5 @@
 <?php
-session_start();
-header('Content-Type;  application/json');
+require_once '../config/init.php';
 
 //Allow only HR/Admin
 if(!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr']))
@@ -19,7 +18,7 @@ require_once '../../classes/class_admin.php';
 $admin = new Admin();
 
 $data       = json_decode(file_get_contents("php://input"), true);
-$employee   = $data['employee_id'] ?? null;
+$employeeID   = $data['employee_id'] ?? null;
 $month      = $data['month'] ?? null;
 $year       = $data['year'] ?? null;
 $bonus      = $data['bonus'] ?? 0;

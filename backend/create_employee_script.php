@@ -38,10 +38,10 @@ if($stmt->rowCount() > 0)
 
 $empInsert = $pdo->prepare("INSERT INTO employees (name, email, phone, join_date, status) VALUES(?,?,?,CURDATE(), 'active')");
 $empInsert->execute([$empName, $email, $phone]);
-$employeeId = $pdo->lastInsertId();
+$employeeID = $pdo->lastInsertId();
 
 $userInsert = $pdo->prepare("INSERT INTO users(username, password, role, employee_id, status) VALUES(?,?,'employee',?,'active')");
-$userInsert->execute([$username, $password_hashed, $employeeId]);
+$userInsert->execute([$username, $password_hashed, $employeeID]);
 
 echo "Test employee '$username' created with password '$password_raw'";
 ?>

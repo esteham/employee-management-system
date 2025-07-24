@@ -166,19 +166,19 @@ class Admin
     /* ================
     PayrollExists
     =====================*/
-    public function payrollExists($employeeId, $month, $year)
+    public function payrollExists($employeeID, $month, $year)
 	{
 		$stmt = $this->pdo->prepare("SELECT id FROM payroll WHERE employee_id = ? AND month = ? AND year = ?");
 
-		$stmt->execute([$employeeId, $month, $year]);
+		$stmt->execute([$employeeID, $month, $year]);
 
 		return $stmt->rowCount() > 0;
 	}
 
-	public function generatePayroll($employeeId, $month, $year, $bonus = 0, $deduction = 0, $overTimeHours = 0)
+	public function generatePayroll($employeeID, $month, $year, $bonus = 0, $deduction = 0, $overTimeHours = 0)
 	{
 		$stmt = $this->pdo->prepare("SELECT basic_salary, overtime_rate FROM salary_structure WHERE employee_id = ?");
-		$stmt->execute([$employeeId]);
+		$stmt->execute([$employeeID]);
 		$salaryData = $stmt->fetch();
 
 		if(!$salaryData)
@@ -195,7 +195,7 @@ class Admin
 		$end = date("Y-m-t", strtotime($start));
 
 		$attStmt = $this->pdo->prepare("SELECT COUNT(*) as total_present FROM attendance WHERE employee_id = ? AND date BETWEEN ? AND ? AND is_weekend = 0 AND is_holiday = 0");
-		$attStmt->execute([$employeeId, $start, $end]);
+		$attStmt->execute([$employeeID, $start, $end]);
 		$totalPresent = $attStmt->fetch()['total_present'];
 	}
     /* ================

@@ -3,7 +3,7 @@ session_start();
 header('Content-Type:  application/json');
 
 //Allow only HR/Admin
-if(!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'],['admin']['hr']))
+if(!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr']))
 {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

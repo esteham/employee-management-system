@@ -164,7 +164,7 @@ class Admin
     =====================*/
 
     /* ================
-    PayrollExists
+    Generate PayrollExists
     =====================*/
     public function payrollExists($employeeID, $month, $year)
 	{
@@ -232,7 +232,38 @@ class Admin
 
 	}
     /* ================
-    End PayrollExists
+    End Generate PayrollExists
+    =====================*/
+
+    /* ================
+    Generate Payroll Reports
+    =====================*/
+    public function getPayrollReport($month, $year)
+    {
+        $sql = "SELECT
+                    p.id,
+                    e.name AS employee_name,
+                    e.email,
+                    p.month,
+                    p.year,
+                    p.basic_salary,
+                    p.bonus,
+                    p.overtime,
+                    p.deduction,
+                    p.late_fine,
+                    p.net_salary,
+                    p.generated_at 
+
+                    FROM payroll p JOIN employees e ON p.employee_id = e.id WHERE p.month = ? AND p.year = ?
+                    ORDER BY e.name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$month, $year]);
+
+        return $stmt->fetchAll();
+    }
+
+    /* ================
+    End Generate Payroll Reports
     =====================*/
 
 

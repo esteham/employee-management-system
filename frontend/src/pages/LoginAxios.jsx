@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api/loginHandler";
 
-const LoginFetch = () => {
+const Login = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -10,31 +13,14 @@ const LoginFetch = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/auth/login.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
+    const data = await loginUser(username, password);
 
-      const data = await response.json();
-      console.log("Response:", data);
-
-      if (data.success) {
-        setSuccess(data.message);
-        setError("");
-      } else {
-        setError(data.message);
-        setSuccess("");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
+    if (data.success) {
+      setSuccess(data.message);
+      setError("");
+      navigate("/"); 
+    } else {
+      setError(data.message);
       setSuccess("");
     }
   };
@@ -42,13 +28,12 @@ const LoginFetch = () => {
   return (
     <Card className="mt-4 p-4 mx-auto" style={{ maxWidth: "400px" }}>
       <h3 className="text-center mb-3">Login</h3>
-
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
 
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="loginEmail">
-          <Form.Label>Email Address / Username</Form.Label>
+          <Form.Label>Username or Email</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter username"
@@ -75,4 +60,4 @@ const LoginFetch = () => {
   );
 };
 
-export default LoginFetch;
+export default Login;

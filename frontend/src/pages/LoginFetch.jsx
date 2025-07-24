@@ -1,31 +1,42 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
-import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [username, setUsername] = useState(""); // can be email if your backend uses email
+const LoginFetch = () => {
+  const nagigate = useNavigate(); //Navigation hook
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent form reload
-    try {
-      const response = await axios.post("http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/auth/login.php", {
-        username,
-        password,
-      });
-      console.log('Response data:', response.data);
+    e.preventDefault();
 
-      if (response.data.success) {
-        setSuccess(response.data.message);
+    try {
+      const response = await fetch("http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/auth/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Response:", data);
+
+      if (data.success) {
+        setSuccess(data.message);
         setError("");
+        nagigate("/");
       } else {
-        setError(response.data.message);
+        setError(data.message);
         setSuccess("");
       }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error(err);
       setError("Something went wrong. Please try again.");
       setSuccess("");
     }
@@ -67,4 +78,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginFetch;

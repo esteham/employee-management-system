@@ -7,7 +7,7 @@ import './index.css';
 import './assets/css/header.css';
 import Header from './components/Header';
 import Home from './components/Home';
-import LoginFetch from './components/LoginFetch'
+import LoginAxios from './pages/LoginAxios'
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/Login" element={<LoginFetch />} />
+        <Route path="/Login" element={<LoginAxios />} />
       </Routes>
     </BrowserRouter>
   );

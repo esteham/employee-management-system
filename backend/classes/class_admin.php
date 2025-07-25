@@ -273,10 +273,24 @@ class Admin
 
         return $stmt->fetchAll();
     }
-
     /* ================
     End Generate Payroll Reports
     =====================*/
+
+     /* =====================
+    Holiday and Weekend Select
+    ========================*/
+    public function getHolidays()
+    {
+        $stmt = $this->pdo->query("SELECT id, title, holiday_date FROM holidays ORDER BY holiday_date ASC");
+        return $stmt->fetchAll();
+    }
+
+    public function getWeekends()
+    {
+        $stmt = $this->pdo->query("SELECT day_of_week FROM weekens ORDER BY ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
 
 }

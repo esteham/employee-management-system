@@ -35,6 +35,9 @@ const Header = () => {
           <li>
             <NavLink to="/contact" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Contact</NavLink>
           </li>
+          <li>
+            <NavLink to="/viewpayroll" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Payroll</NavLink>
+          </li>
 
           {!user ? (
             <>

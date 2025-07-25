@@ -11,9 +11,11 @@ import Home from './components/Home';
 import About from './components/About';
 import Contact from './components/Contact';
 import LoginFetch from './pages/LoginFetch';
+import ViewPayroll from './pages/Payroll/ViewPayroll'
 import HrDashboard from './pages/Dashboard/HrDashboard';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import EmployeeDashboard from './pages/Dashboard/EmployeeDashboard';
+// import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
+          <Route path="/ViewPayroll" element={<ViewPayroll />} />
           <Route path="/LoginFetch" element={<LoginFetch />} />
           <Route path="/HrDashboard" element={<HrDashboard />} />
           <Route path="/AdminDashboard" element={<AdminDashboard />} />

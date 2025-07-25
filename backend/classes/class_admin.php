@@ -41,7 +41,6 @@ class Admin
     public function login ($username, $password)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE username = ? AND status = 'active'");
-
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
@@ -51,15 +50,18 @@ class Admin
             return [
                 'success'   =>true,
                 'data'      =>[
-                            'id'            =>$user['id'],
-                            'employee_id'   =>$user['employee_id'],
-                            'role'          =>$user['role']
+                            'id'         =>$user['id'],
+                            'employee_id'=>$user['employee_id'],
+                            'role'       =>$user['role']
                 ],
             ];
         }
 
         else{
-            return ['success'=> false, 'message'=>'Invalid login credentials'];
+            return [
+                'success'=> false, 
+                'message'=>'Invalid login credentials'
+            ];
         }
     }
     /* ================
@@ -80,7 +82,10 @@ class Admin
 
         if($check->rowCount() > 0)
         {
-            return ['success'=> false, 'massage'=> 'Already marked today'];
+            return [
+                'success'=> false, 
+                'massage'=> 'Already marked today'
+            ];
         }
 
         //check if today is weekend and holiday
@@ -94,9 +99,9 @@ class Admin
         $isWeekend  = $weekendChk->rowCount() > 0 ? 1 : 0;
 
         //Get login rules
-        $rule   = $this->pdo->prepare("SELECT * FROM login_rules WHERE employee_id = ?");
-        $rule   ->execute([$employeeID]);
-        $loginRule = $rule->fetch();
+        $rule       = $this->pdo->prepare("SELECT * FROM login_rules WHERE employee_id = ?");
+        $rule       ->execute([$employeeID]);
+        $loginRule  = $rule->fetch();
 
         //Late Count and fine 
         $isLate = 0;
@@ -104,9 +109,9 @@ class Admin
 
         if($loginRule)
         {
-            $officialTime   = strtotime($loginRule['login_time']);
-            $graceTime      = $loginRule['grace_period_minutes'] * 60;
-            $currentTime    = strtotime($timeNow);
+            $officialTime= strtotime($loginRule['login_time']);
+            $graceTime   = $loginRule['grace_period_minutes'] * 60;
+            $currentTime = strtotime($timeNow);
 
             if($currentTime > ($officialTime + $graceTime) && !$isWeekend && !$isHoliday)
             {
@@ -124,11 +129,15 @@ class Admin
         if($isLate && $fine > 0)
         {
             $attendanceID  = $this->pdo->lastInsertId();
-            $fineLog        = $this->pdo->prepare("INSERT INTO late_fines (employee_id, attendance_id, date, fine_amount) VALUES (?, ?, ?, ?)");
-            $fineLog        ->execute([$employeeID, $attendanceID, $today, $fine]);
+            $fineLog       = $this->pdo->prepare("INSERT INTO late_fines (employee_id, attendance_id, date, fine_amount) VALUES (?, ?, ?, ?)");
+            $fineLog       ->execute([$employeeID, $attendanceID, $today, $fine]);
         }
 
-        return ['success'=> true, 'message' => 'Attendance Recorded', 'late' => $isLate, 'fine' => $fine];
+        return [
+            'success'=> true, 
+            'message'=> 'Attendance Recorded', 
+            'late'   => $isLate, 
+            'fine'   => $fine];
 
     }
     /* ================
@@ -148,8 +157,8 @@ class Admin
         {
             $row = $stmt->fetch();
             return [
-                'already_marked'    => true,
-                'check_in'          => $row['check_in'],
+                'already_marked'=> true,
+                'check_in'      => $row['check_in'],
             ];
 
         }
@@ -170,7 +179,7 @@ class Admin
 	{
 		$stmt = $this->pdo->prepare("SELECT id FROM payroll WHERE employee_id = ? AND month = ? AND year = ?");
 
-		$stmt->execute([$employeeID, $month, $year]);
+		$stmt ->execute([$employeeID, $month, $year]);
 
 		return $stmt->rowCount() > 0;
 	}
@@ -183,7 +192,10 @@ class Admin
 
 		if(!$salaryData)
 		{
-			return ['success' => false, 'message' => 'Salary structure not found'];
+			return [
+                'success' => false, 
+                'message' => 'Salary structure not found'
+            ];
 		}
 
 		$basicSalary = $salaryData['basic_salary'];
@@ -226,7 +238,7 @@ class Admin
                         'late_fine'     => $totalFine,
                         'bonus'         => $bonus,
                         'deduction'     => $deduction
-                ],
+                    ],
 
             ];
 

@@ -1,6 +1,11 @@
 <?php
 session_start();
-header('Content-Type: application/json');
+
+// ✅ CORS Headers
+header("Access-Control-Allow-Origin: http://localhost:5173"); //React origin
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type"); // 🔑 Without this, content-type error will occur
+header("Access-Control-Allow-Methods: POST, OPTIONS"); // Allow preflight requests
 
 $_SESSION = [];
 

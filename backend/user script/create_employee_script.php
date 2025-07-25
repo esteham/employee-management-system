@@ -1,9 +1,9 @@
 <?php
 $host = "localhost";
-		$db = "ems_db";
-		$user = "root";
-		$pass = "";
-		$charset = "utf8mb4";
+		$db		= "ems_db";
+		$user	= "root";
+		$pass	= "";
+		$charset= "utf8mb4";
 
 		$dsn = "mysql:host=$host; dbname=$db; charset=$charset";
 		$options = [
@@ -22,12 +22,12 @@ $host = "localhost";
 		{
 			die("DB Connection Failed: ".$e->getMessage());
 		}
-$empName = "Test Employee";
-$email = "demoemp@email.com";
-$phone = "0123456789";
-$username = "employee1";
-$password_raw = "09876543";
-$password_hashed = password_hash($password_raw, PASSWORD_DEFAULT);
+$empName		= "Test Employee";
+$email			= "demoemp@email.com";
+$phone			= "0123456789";
+$username		= "employee1";
+$password_raw	= "09876543";
+$password_hashed= password_hash($password_raw, PASSWORD_DEFAULT);
 
 $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
 $stmt->execute([$username]);

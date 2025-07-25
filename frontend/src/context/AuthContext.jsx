@@ -1,13 +1,22 @@
 // src/context/AuthContext.js
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // null means not logged in
 
+  // 🔁 On first load, check localStorage for saved user
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser)); // Restore user from localStorage
+    }
+  }, []);
+
   const login = (userData) => {
     setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData)); // Save to localStorage
   };
 
   const logout = async () => {
@@ -24,6 +33,7 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(null);
+        localStorage.removeItem("user"); // Clear from localStorage
         console.log(data.message);
       } else {
         console.error("Logout failed:", data.message);

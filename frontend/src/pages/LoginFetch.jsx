@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const LoginFetch = () => {
   const navigate = useNavigate(); //Navigation hook
+  const { login } = useAuth(); 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
@@ -29,18 +31,11 @@ const LoginFetch = () => {
       console.log("Response:", data);
 
       if (data.success) {
-        setSuccess(data.message);
-        setError("");
-          // Role-based redirect
-          if (data.role === "admin") {
-            navigate("/AdminDashboard");
-          } else if (data.role === "hr") {
-            navigate("/HrDashboard");
-          } else if (data.role === "employee") {
-            navigate("/EmployeeDashboard");
-          } else {
-            navigate("/"); // fallback
-          }
+        login({ username: username, role: data.role });
+        navigate(data.role === "admin" ? "/AdminDashboard"
+                : data.role === "hr" ? "/HrDashboard"
+                : data.role === "employee" ? "/EmployeeDashboard"
+              : "/");
       } else {
         setError(data.message);
         setSuccess("");

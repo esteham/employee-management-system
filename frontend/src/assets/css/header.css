@@ -137,3 +137,19 @@
     transform: rotate(-45deg) translate(7px, -6px);
   }
 }
+
+/*Dropdown menu*/
+.dropdown {
+  position: relative;
+}
+.dropdown-menu {
+  position: absolute;
+  background: white;
+  list-style: none;
+  padding: 10px;
+  display: none;
+  border: 1px solid #ddd;
+}
+.dropdown:hover .dropdown-menu {
+  display: block;
+}

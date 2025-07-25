@@ -53,9 +53,9 @@ const ViewPayroll = () => {
                 throw new Error(data.message || 'Failed to fetch payroll data');
             }
 
-            setPayrollData(data.data);
+            setPayrollData(data.data || {});
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'An error occurred while generating payroll');
         } finally {
             setLoading(false);
         }
@@ -86,12 +86,22 @@ const ViewPayroll = () => {
                 throw new Error(data.message || 'Failed to fetch report');
             }
 
-            setReportData(data.data);
+            setReportData(Array.isArray(data.data) ? data.data : []);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'An error occurred while fetching report');
         } finally {
             setLoadingReport(false);
         }
+    };
+
+    // Helper function to format currency
+    const formatCurrency = (value) => {
+        return (value || 0).toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
     };
 
     return (
@@ -187,7 +197,7 @@ const ViewPayroll = () => {
                         <tbody>
                             <tr>
                                 <td><strong>Employee ID</strong></td>
-                                <td>{payrollData.employee_id}</td>
+                                <td>{payrollData.employee_id || 'N/A'}</td>
                             </tr>
                             <tr>
                                 <td><strong>Employee Name</strong></td>
@@ -199,23 +209,23 @@ const ViewPayroll = () => {
                             </tr>
                             <tr>
                                 <td>Basic Salary</td>
-                                <td>${(payrollData.basic_salary || 0).toFixed(2)}</td>
+                                <td>{formatCurrency(payrollData.basic_salary)}</td>
                             </tr>
                             <tr>
                                 <td>Bonus</td>
-                                <td>${(payrollData.bonus || 0).toFixed(2)}</td>
+                                <td>{formatCurrency(payrollData.bonus)}</td>
                             </tr>
                             <tr>
                                 <td>Deductions</td>
-                                <td>${(payrollData.deduction || 0).toFixed(2)}</td>
+                                <td>{formatCurrency(payrollData.deduction)}</td>
                             </tr>
                             <tr>
                                 <td>Overtime</td>
-                                <td>${(payrollData.overtime || 0).toFixed(2)}</td>
+                                <td>{formatCurrency(payrollData.overtime)}</td>
                             </tr>
                             <tr className="table-primary">
                                 <td><strong>Net Salary</strong></td>
-                                <td><strong>${(payrollData.net_salary || 0).toFixed(2)}</strong></td>
+                                <td><strong>{formatCurrency(payrollData.net_salary)}</strong></td>
                             </tr>
                         </tbody>
                     </Table>
@@ -236,8 +246,7 @@ const ViewPayroll = () => {
                         <Table striped bordered hover responsive>
                             <thead className="table-dark">
                                 <tr>
-                                    <th>Employee ID</th>
-                                    <th>Name</th>
+                                    <th>Employee Name</th>
                                     <th>Basic Salary</th>
                                     <th>Bonus</th>
                                     <th>Deductions</th>
@@ -246,15 +255,14 @@ const ViewPayroll = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {reportData.map((row) => (
-                                    <tr key={`${row.employee_id}-${formData.month}-${formData.year}`}>
-                                        <td>{row.employee_id}</td>
+                                {reportData.map((row, index) => (
+                                    <tr key={`${row.id || index}-${formData.month}-${formData.year}`}>
                                         <td>{row.employee_name || 'N/A'}</td>
-                                        <td>${(row.basic_salary || 0).toFixed(2)}</td>
-                                        <td>${(row.bonus || 0).toFixed(2)}</td>
-                                        <td>${(row.deduction || 0).toFixed(2)}</td>
-                                        <td>${(row.overtime || 0).toFixed(2)}</td>
-                                        <td><strong>${(row.net_salary || 0).toFixed(2)}</strong></td>
+                                        <td>{formatCurrency(row.basic_salary)}</td>
+                                        <td>{formatCurrency(row.bonus)}</td>
+                                        <td>{formatCurrency(row.deduction)}</td>
+                                        <td>{formatCurrency(row.overtime)}</td>
+                                        <td><strong>{formatCurrency(row.net_salary)}</strong></td>
                                     </tr>
                                 ))}
                             </tbody>

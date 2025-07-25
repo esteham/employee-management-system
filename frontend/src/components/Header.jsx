@@ -35,9 +35,14 @@ const Header = () => {
           <li>
             <NavLink to="/contact" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Contact</NavLink>
           </li>
-          <li>
-            <NavLink to="/viewpayroll" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Payroll</NavLink>
-          </li>
+
+          {user && (user.role === "admin" || user.role === "hr") && (
+            <li>
+              <NavLink to="/viewpayroll" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+                Payroll
+              </NavLink>
+            </li>
+          )}
 
           {!user ? (
             <>
@@ -58,6 +63,7 @@ const Header = () => {
             </li>
           )}
         </ul>
+
       </nav>
     </header>
   );

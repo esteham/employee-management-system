@@ -3,7 +3,7 @@ import { Form, Button, Card, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../apiHandler/loginHandler";
 
-const Login = () => {
+const LoginAxios = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +18,16 @@ const Login = () => {
     if (data.success) {
       setSuccess(data.message);
       setError("");
-      navigate("/"); 
+        // Role-based redirect
+          if (data.role === "admin") {
+            navigate("/AdminDashboard");
+          } else if (data.role === "hr") {
+            navigate("/HrDashboard");
+          } else if (data.role === "employee") {
+            navigate("/EmployeeDashboard");
+          } else {
+            navigate("/"); // fallback
+          }
     } else {
       setError(data.message);
       setSuccess("");
@@ -60,4 +69,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginAxios;

@@ -3,7 +3,7 @@ import { Form, Button, Card, Alert } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 
 const LoginFetch = () => {
-  const nagigate = useNavigate(); //Navigation hook
+  const navigate = useNavigate(); //Navigation hook
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
@@ -31,7 +31,16 @@ const LoginFetch = () => {
       if (data.success) {
         setSuccess(data.message);
         setError("");
-        nagigate("/");
+          // Role-based redirect
+          if (data.role === "admin") {
+            navigate("/AdminDashboard");
+          } else if (data.role === "hr") {
+            navigate("/HrDashboard");
+          } else if (data.role === "employee") {
+            navigate("/EmployeeDashboard");
+          } else {
+            navigate("/"); // fallback
+          }
       } else {
         setError(data.message);
         setSuccess("");

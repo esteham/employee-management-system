@@ -8,13 +8,7 @@ session_set_cookie_params([
   'samesite'=> 'Lax' //'None' if needed
 ]);
 
-header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Credentials: true");
-header("Content-Type: application/json");
-
-session_start();
+require_once '../config/init.php';
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST')
 {
@@ -55,8 +49,9 @@ if($result['success'])
     echo json_encode([
             'success'=> true, 
             'message'=> 'Login Successfull',
-            'role'   => $result['data']['role'
-            ]]);
+            'role'   => $result['data']['role']
+        ]);
+
 }
 
 else
@@ -64,5 +59,5 @@ else
     echo json_encode([
             'success'=>  false, 
             'message'=> $result['message'
-            ]]);
+        ]]);
 }

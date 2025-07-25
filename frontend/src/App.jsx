@@ -8,6 +8,9 @@ import './assets/css/header.css';
 import Header from './components/Header';
 import Home from './components/Home';
 import LoginFetch from './pages/LoginFetch'
+import HrDashboard from './pages/Dashboard/HrDashboard';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import EmployeeDashboard from './pages/Dashboard/EmployeeDashboard';
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/LoginFetch" element={<LoginFetch />} />
+        <Route path="/HrDashboard" element={<HrDashboard />} />
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/EmployeeDashboard" element={<EmployeeDashboard />} />
       </Routes>
     </BrowserRouter>
   );

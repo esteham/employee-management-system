@@ -30,7 +30,7 @@ class Admin
     /*
     Setter Function for public
    */
-    public function getPdo()
+    public function getPDO()
     {
         return $this->pdo;
     }

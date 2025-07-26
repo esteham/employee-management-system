@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json');
-session_start();
+require_once '../config/init.php';
 
 if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr'])) {
     echo json_encode([
@@ -32,6 +31,7 @@ try {
     $department_id  = $_POST['department_id'] ?? '';
 
     // Optional Emergency Fields
+    $address            = $_POST['address'] ?? null;
     $emergency_name     = $_POST['emergency_name'] ?? null;
     $emergency_phone    = $_POST['emergency_phone'] ?? null;
     $emergency_relation = $_POST['emergency_relation'] ?? null;
@@ -44,9 +44,9 @@ try {
 
     // Insert into employees table
     $stmt = $pdo->prepare("INSERT INTO 
-            employees (first_name, last_name, email, phone, department_id, emergency_name, emergency_phone, emergency_relation, join_date, status)
+            employees (first_name, last_name, email, phone, department_id, address, emergency_name, emergency_phone, emergency_relation, join_date, status)
             VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), 'active')
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), 'active')
         ");
     $stmt->execute([
         $first_name,
@@ -54,6 +54,7 @@ try {
         $email,
         $phone,
         $department_id,
+        $address,
         $emergency_name,
         $emergency_phone,
         $emergency_relation
@@ -89,18 +90,18 @@ try {
     // Send email
     $subject = "Your Employee Account is Ready";
     $message = "
-            Dear $first_name $last_name,
+        Dear $first_name $last_name,
 
-            Your employee account has been created successfully.
+        Your employee account has been created successfully.
 
-            Username: $username
-            Temporary Password: $rawPassword
+        Username: $username
+        Temporary Password: $rawPassword
 
-            Please login and change your password immediately.
+        Please login and change your password immediately.
 
-            Thank you,
-            HR/Admin Team
-        ";
+        Thank you,
+        HR/Admin Team
+    ";
 
     $mailSend = $admin->sendMail($email, $message, $subject);
 

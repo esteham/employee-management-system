@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json');
-session_start();
+require_once '../config/init.php';
 
 if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr'])) {
     echo json_encode([

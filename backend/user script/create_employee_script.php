@@ -22,7 +22,8 @@ $host = "localhost";
 		{
 			die("DB Connection Failed: ".$e->getMessage());
 		}
-$empName		= "Test Employee";
+$first_name		= "Employee";
+$last_name		= "Spider"
 $email			= "demoemp@email.com";
 $phone			= "0123456789";
 $username		= "employee1";
@@ -36,8 +37,8 @@ if($stmt->rowCount() > 0)
 	exit("user already exists");
 }
 
-$empInsert = $pdo->prepare("INSERT INTO employees (name, email, phone, join_date, status) VALUES(?,?,?,CURDATE(), 'active')");
-$empInsert->execute([$empName, $email, $phone]);
+$empInsert = $pdo->prepare("INSERT INTO employees (first_name, last_name, email, phone, join_date, status) VALUES(?,?,?,?,CURDATE(), 'active')");
+$empInsert->execute([$first_name, $last_name, $email, $phone]);
 $employeeID = $pdo->lastInsertId();
 
 $userInsert = $pdo->prepare("INSERT INTO users(username, password, role, employee_id, status) VALUES(?,?,'employee',?,'active')");

@@ -1,29 +1,21 @@
 CREATE TABLE employees (
-			id INT AUTO_INCREMENT PRIMARY KEY,
-    		name VARCHAR(100) NOT NULL,
-    		email VARCHAR(100) UNIQUE,
-    		phone VARCHAR(20),
-    		image VARCHAR(250),
-    		join_date DATE NOT NULL,
-    		status ENUM('active','inactive') DEFAULT 'active',
-    		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-			);
+			id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			email VARCHAR(100) COLLATE utf8mb4_general_ci UNIQUE,
+			phone VARCHAR(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			image VARCHAR(250) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			join_date DATE NOT NULL,
+			status ENUM('active', 'inactive') COLLATE utf8mb4_general_ci DEFAULT 'active',
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			first_name VARCHAR(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			last_name VARCHAR(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			address TEXT DEFAULT NULL,
+			department_id INT(11) DEFAULT NULL,
+			emergency_name VARCHAR(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			emergency_phone VARCHAR(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			emergency_relation VARCHAR(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+			INDEX fk_department (department_id)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-			ALTER TABLE employees 
-			ADD COLUMN first_name VARCHAR(100), 
-			ADD COLUMN last_name VARCHAR(100), 
-			ADD COLUMN department_id INT, 
-			DROP COLUMN name;
-			ADD COLUMN emergency_name VARCHAR(100) NULL,
-			ADD COLUMN emergency_phone VARCHAR(20) NULL,
-			ADD COLUMN emergency_relation VARCHAR(50) NULL;
-
-			ALTER TABLE employees
-			ADD CONSTRAINT fk_department
-			FOREIGN KEY (department_id)
-			REFERENCES departments(id)
-			ON DELETE SET NULL
-			ON UPDATE CASCADE;
 
 CREATE TABLE users (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,10 +92,11 @@ CREATE TABLE late_fines (
 
 CREATE TABLE documents (
 			id INT AUTO_INCREMENT PRIMARY KEY,
-    		employee_id INT UNIQUE NOT NULL,
-			doc_type VARCHAR(255) NOT NULL,
-    		file_path VARCHAR(255) NOT NULL,
-    		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+			employee_id INT NOT NULL,
+			doc_type ENUM('certificate', 'experience', 'other') NOT NULL,
+			file_path VARCHAR(255) NOT NULL,
+			FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+			UNIQUE KEY uk_emp_doctype (employee_id, doc_type)
 			);
 
 CREATE TABLE holidays (

@@ -37,16 +37,11 @@ const Header = () => {
           </li>
 
           {user && (user.role === "admin" || user.role === "hr") && (
-            <>
               <li>
                 <NavLink to="/viewpayroll" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                   Payroll
                 </NavLink>
               </li>
-              <li>
-                  <NavLink to="/register" className={({ isActive }) => isActive ? "nav-link active register-btn" : "nav-link register-btn"}>Register</NavLink>
-              </li>
-            </>
           )}
 
           {!user ? (

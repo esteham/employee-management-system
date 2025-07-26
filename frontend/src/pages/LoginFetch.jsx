@@ -155,19 +155,13 @@ const LoginFetch = () => {
                 </>
               )}
             </Button>
-
-            <div className="text-center mt-3">
-              <a href="/forgot-password" className="text-decoration-none small">
-                Forgot password?
-              </a>
-            </div>
           </Form>
 
           <div className="text-center mt-4 pt-3 border-top">
             <p className="text-muted small mb-0">
-              Don't have an account?{" "}
-              <a href="/register" className="text-decoration-none">
-                Sign up
+              Are you forget your Password?{" "}
+              <a href="/forgot-password" className="text-decoration-none">
+                Click Here!
               </a>
             </p>
           </div>

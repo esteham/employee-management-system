@@ -54,7 +54,12 @@ const ViewPayroll = () => {
                 throw new Error(data.message || 'Failed to fetch payroll data');
             }
 
-            setPayrollData(data.data || {});
+            setPayrollData({
+                    employee_id: formData.employee_id,
+                    employee_name: data.employee_name,
+                    net_salary: data.net_salary,
+                    ...data.details
+                });
         } catch (err) {
             setError(err.message || 'An error occurred while generating payroll');
         } finally {

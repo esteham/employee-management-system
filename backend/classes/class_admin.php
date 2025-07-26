@@ -72,9 +72,35 @@ class Admin
     Send mail function
     ================*/
     public function sendMail($email, $message, $subject)
-    {
+	{
+		require_once __DIR__ . '/../admin/PHPMailer//PHPMailer.php';
+		require_once __DIR__ . '/../admin/PHPMailer/SMTP.php';
 
-    }
+		$mail = new PHPMailer\PHPMailer\PHPMailer();
+		$mail->isSMTP();
+		$mail->SMTPDebug = 0; // use 2 for debug
+		$mail->Host = 'smtp.gmail.com';
+		$mail->SMTPAuth = true;
+		$mail->Username = 'deepseekspider@gmail.com';
+		$mail->Password = 'rjvaiybizhrajodd'; // App password
+		$mail->SMTPSecure = 'tls';
+		$mail->Port = 587;
+
+		$mail->setFrom('deepseekspider@gmail.com', 'Xetlab');
+		$mail->addAddress($email);
+		$mail->isHTML(true);
+		$mail->CharSet = 'UTF-8';
+		$mail->AltBody = strip_tags($message);
+		$mail->Subject = $subject;
+		$mail->Body = $message;
+
+		if (!$mail->send()) {
+			$_SESSION['mailError'] = $mail->ErrorInfo;
+			return false;
+		} else {
+			return true;
+		}
+	}
     /* =================
     End Send mail function
     ====================*/
@@ -196,64 +222,68 @@ class Admin
 	}
 
 	public function generatePayroll($employeeID, $month, $year, $bonus = 0, $deduction = 0, $overTimeHours = 0)
-	{
-		$stmt = $this->pdo->prepare("SELECT basic_salary, overtime_rate FROM salary_structure WHERE employee_id = ?");
-		$stmt->execute([$employeeID]);
-		$salaryData = $stmt->fetch();
+    {
+        // Get basic salary and overtime rate
+        $stmt = $this->pdo->prepare("SELECT basic_salary, overtime_rate FROM salary_structure WHERE employee_id = ?");
+        $stmt->execute([$employeeID]);
+        $salaryData = $stmt->fetch();
 
-		if(!$salaryData)
-		{
-			return [
+        if(!$salaryData) {
+            return [
                 'success' => false, 
                 'message' => 'Salary structure not found'
             ];
-		}
+        }
 
-		$basicSalary = $salaryData['basic_salary'];
-		$overtimeRate = $salaryData['overtime_rate'];
+        $basicSalary = $salaryData['basic_salary'];
+        $overtimeRate = $salaryData['overtime_rate'];
 
-		//Count working days and late fines
+        // Set date range
+        $start = "$year-$month-01";
+        $end = date("Y-m-t", strtotime($start));
 
-		$start = "$year-$month-01";
-		$end = date("Y-m-t", strtotime($start));
+        // Get attendance count
+        $attStmt = $this->pdo->prepare("SELECT COUNT(*) as total_present FROM attendance WHERE employee_id = ? AND date BETWEEN ? AND ? AND is_weekend = 0 AND is_holiday = 0");
+        $attStmt->execute([$employeeID, $start, $end]);
+        $totalPresent = $attStmt->fetch()['total_present'];
 
-		$attStmt = $this->pdo->prepare("SELECT COUNT(*) as total_present FROM attendance WHERE employee_id = ? AND date BETWEEN ? AND ? AND is_weekend = 0 AND is_holiday = 0");
-		$attStmt->execute([$employeeID, $start, $end]);
-		$totalPresent = $attStmt->fetch()['total_present'];
-
-        //Sum of late fine in the month
+        // Get total late fine
         $fineStmt = $this->pdo->prepare("SELECT SUM(fine_amount) as total_fine FROM late_fines WHERE employee_id = ? AND date BETWEEN ? AND ?");
-        $fineStmt ->execute([$employeeID, $start, $end]);
-
+        $fineStmt->execute([$employeeID, $start, $end]);
         $totalFine = $fineStmt->fetch()['total_fine'] ?? 0;
 
-        //Overtime payment
+        // Calculate overtime payment
         $overtimePay = $overTimeHours * $overtimeRate;
 
-        //Final Net salary
+        // Calculate net salary
         $netSalary = $basicSalary + $bonus + $overtimePay - $deduction - $totalFine;
-        /*add more options like medical,house rent, and some others facilities*/
 
-        //Insert into payroll
-        $insert = $this->pdo-> prepare("INSERT INTO payroll (employee_id, month, year, basic_salary, bonus, overtime, deduction, late_fine, net_salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        // Get employee name
+        $empStmt = $this->pdo->prepare("SELECT first_name FROM employees WHERE id = ?");
+        $empStmt->execute([$employeeID]);
+        $employee = $empStmt->fetch();
+        $employeeName = $employee ? $employee['first_name'] : 'Unknown';
+
+        // Insert into database
+        $insert = $this->pdo->prepare("INSERT INTO payroll (employee_id, month, year, basic_salary, bonus, overtime, deduction, late_fine, net_salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $insert->execute([$employeeID, $month, $year, $basicSalary, $bonus, $overtimePay, $deduction, $totalFine, $netSalary]);
 
         return [
+            'success'       => true,
+            'message'       => 'Payroll generated successfully',
+            'employee_id'   => $employeeID,
+            'employee_name' => $employeeName,
+            'net_salary'    => $netSalary,
+            'details'       => [
+                'present_day' => $totalPresent,
+                'overtime'    => $overTimeHours,
+                'late_fine'   => $totalFine,
+                'bonus'       => $bonus,
+                'deduction'   => $deduction
+            ]
+        ];
+    }
 
-                'success'   => true,
-                'message'   => 'Payroll generated successfully',
-                'net_salary'=> $netSalary,
-                'details'   => [
-                        'predent_day'   => $totalPresent,
-                        'overtime'      => $overTimeHours,
-                        'late_fine'     => $totalFine,
-                        'bonus'         => $bonus,
-                        'deduction'     => $deduction
-                    ],
-
-            ];
-
-	}
     /* ================
     End Generate PayrollExists
     =====================*/
@@ -265,7 +295,7 @@ class Admin
     {
         $sql = "SELECT
                     p.id,
-                    e.name AS employee_name,
+                    e.first_name AS employee_name,
                     e.email,
                     p.month,
                     p.year,
@@ -278,7 +308,7 @@ class Admin
                     p.generated_at 
 
                     FROM payroll p JOIN employees e ON p.employee_id = e.id WHERE p.month = ? AND p.year = ?
-                    ORDER BY e.name ASC";
+                    ORDER BY e.first_name ASC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$month, $year]);
 

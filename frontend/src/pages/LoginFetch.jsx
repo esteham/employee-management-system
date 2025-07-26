@@ -1,23 +1,24 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const LoginFetch = () => {
   const navigate = useNavigate(); //Navigation hook
-  const { login } = useAuth(); 
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [success, setSuccess]   = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const apiURL = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/auth/login.php", {
-        method  : "POST",
-        headers : {
+      const response = await fetch(`${apiURL}backend/api/auth/login.php`, {
+        method: "POST",
+        headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
@@ -32,10 +33,15 @@ const LoginFetch = () => {
 
       if (data.success) {
         login({ username: username, role: data.role });
-        navigate(data.role === "admin" ? "/AdminDashboard"
-                : data.role === "hr" ? "/HrDashboard"
-                : data.role === "employee" ? "/EmployeeDashboard"
-              : "/");
+        navigate(
+          data.role === "admin"
+            ? "/AdminDashboard"
+            : data.role === "hr"
+            ? "/HrDashboard"
+            : data.role === "employee"
+            ? "/EmployeeDashboard"
+            : "/"
+        );
       } else {
         setError(data.message);
         setSuccess("");
@@ -57,22 +63,22 @@ const LoginFetch = () => {
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="loginEmail">
           <Form.Label>Email Address / Username</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
+          <Form.Control
+            type="text"
+            placeholder="Enter username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </Form.Group>
 
         <Form.Group controlId="loginPassword" className="mt-3">
           <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          <Form.Control
+            type="password"
+            placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </Form.Group>
 
         <Button variant="primary" type="submit" className="mt-4 w-100">

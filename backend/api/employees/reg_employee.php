@@ -1,13 +1,14 @@
 <?php
 header('Content-Type: application/json');
-session_start()
+session_start();
 
-if(!isset($_SESSION['user']) || !in_array($SESSION['user']['role'],['admin','hr']))
+if(!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'],['admin','hr']))
 {
     echo json_encode([
             'success'=> false,
             'message'=> 'Unauthorized Access'
         ]);
+    exit;
 }
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST')
@@ -24,10 +25,10 @@ try
 {
     $name     = $_POST['name'] ?? '';
     $email    = $_POST['email'] ?? '';
-    $phone    = $_POST['phone'] ?? ''?
+    $phone    = $_POST['phone'] ?? '';
     $username = $_POST['username'] ?? '';
 
-    if(!$name || !$email, || !$phone, || !$username)
+    if(!$name || !$email || !$phone || !$username)
     {
         echo json_encode([
                 'success'=> false,

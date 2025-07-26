@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
+const apiURL = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // null means not logged in
@@ -21,12 +22,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await fetch("http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/auth/logout.php", {
+      const response = await fetch(`${apiURL}backend/api/auth/logout.php`, {
         method: "POST",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       const data = await response.json();
@@ -34,11 +35,11 @@ export const AuthProvider = ({ children }) => {
       if (data.success) {
         setUser(null);
         localStorage.removeItem("user"); // Clear from localStorage
+        localStorage.clear();
         console.log(data.message);
       } else {
         console.error("Logout failed:", data.message);
       }
-
     } catch (error) {
       console.error("Logout request error:", error);
     }
@@ -52,7 +53,6 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
 
 /**==========
  * Use Axios

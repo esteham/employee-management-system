@@ -64,9 +64,20 @@ class Admin
             ];
         }
     }
-    /* ================
+    /* =============
     End User Login
-    =====================*/
+    ==============*/
+
+    /* ===============
+    Send mail function
+    ================*/
+    public function sendMail($email, $message, $subject)
+    {
+
+    }
+    /* =================
+    End Send mail function
+    ====================*/
 
     /* ================
     Record Attendance

@@ -13,6 +13,7 @@ const ViewPayroll = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingReport, setLoadingReport] = useState(false);
+    const apiURL = import.meta.env.VITE_API_URL;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,7 +35,7 @@ const ViewPayroll = () => {
                 throw new Error('Employee ID is required');
             }
 
-            const response = await fetch('http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/payroll/generate.php', {
+            const response = await fetch(`${apiURL}backend/api/payroll/generate.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -68,7 +69,7 @@ const ViewPayroll = () => {
         setReportData(null);
 
         try {
-            const response = await fetch('http://localhost/IsDB_WDPF_CGNT-M_64/PROJECTs/REACT/employee-management-system/backend/api/payroll/reports.php', {
+            const response = await fetch(`${apiURL}backend/api/payroll/reports.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

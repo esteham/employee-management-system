@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext"; // ✅ Import useAuth with AuthProvider
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -11,30 +11,99 @@ import Home from './components/Home';
 import About from './components/About';
 import Contact from './components/Contact';
 import LoginFetch from './pages/LoginFetch';
-import ViewPayroll from './pages/Payroll/ViewPayroll'
+import ViewPayroll from './pages/Payroll/ViewPayroll';
 import HrDashboard from './pages/Dashboard/HrDashboard';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import EmployeeDashboard from './pages/Dashboard/EmployeeDashboard';
-// import ErrorBoundary from './components/ErrorBoundary';
+
+
+// ✅ ProtectedRoute Component with loading check
+const ProtectedRoute = ({ children, roles }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="text-center mt-5">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/LoginFetch" replace />;
+  }
+
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// ✅ Role-based dynamic redirect
+const RoleDashboard = () => {
+  const { user } = useAuth();
+
+  switch (user?.role) {
+    case 'admin':
+      return <AdminDashboard />;
+    case 'hr':
+      return <HrDashboard />;
+    case 'employee':
+      return <EmployeeDashboard />;
+    default:
+      return <Navigate to="/" replace />;
+  }
+};
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Header />
+
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
-          <Route path="/ViewPayroll" element={<ViewPayroll />} />
           <Route path="/LoginFetch" element={<LoginFetch />} />
-          <Route path="/HrDashboard" element={<HrDashboard />} />
-          <Route path="/AdminDashboard" element={<AdminDashboard />} />
-          <Route path="/EmployeeDashboard" element={<EmployeeDashboard />} />
+
+          {/* Protected Routes */}
+          <Route path="/ViewPayroll" element={
+            <ProtectedRoute roles={['admin', 'hr']}>
+              <ViewPayroll />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/HrDashboard" element={
+            <ProtectedRoute roles={['hr']}>
+              <HrDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/AdminDashboard" element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/EmployeeDashboard" element={
+            <ProtectedRoute roles={['employee']}>
+              <EmployeeDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Dynamic Dashboard Redirect */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <RoleDashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   );
-};
+}
 
 export default App;

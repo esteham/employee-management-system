@@ -1,23 +1,23 @@
-// src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 const apiURL = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // null means not logged in
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // ✅ loading state
 
-  // 🔁 On first load, check localStorage for saved user
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser)); // Restore user from localStorage
+      setUser(JSON.parse(storedUser));
     }
+    setLoading(false); // ✅ Finished loading
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData)); // Save to localStorage
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = async () => {
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(null);
-        localStorage.removeItem("user"); // Clear from localStorage
+        localStorage.removeItem("user");
         localStorage.clear();
         console.log(data.message);
       } else {
@@ -46,51 +46,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-/**==========
- * Use Axios
- ============*/
-// // src/context/AuthContext.js
-// import React, { createContext, useContext, useState } from "react";
-// import axios from "axios"; // axios import করতে হবে
-
-// const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [user, setUser] = useState(null); // null means not logged in
-
-//   const login = (userData) => {
-//     setUser(userData); // example: { username: 'GPT', role: 'admin' }
-//   };
-
-//   const logout = async () => {
-//     try {
-//       await axios.post(
-//         "http://localhost/your-backend-path/logout.php", // ✅ তোমার backend logout.php path দাও
-//         {},
-//         {
-//           withCredentials: true, // cookie পাঠানোর জন্য
-//         }
-//       );
-
-//       setUser(null); // Session destroy হলে local user state clear
-//     } catch (error) {
-//       console.error("Logout failed:", error);
-//     }
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ user, login, logout }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// export const useAuth = () => useContext(AuthContext);

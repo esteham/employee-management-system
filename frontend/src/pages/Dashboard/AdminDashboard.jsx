@@ -1,21 +1,135 @@
 import React, { useState } from 'react';
-import { Button, Container, Row, Col, Card, Nav } from 'react-bootstrap';
+import { 
+  Button, 
+  Container, 
+  Row, 
+  Col, 
+  Card, 
+  Nav,
+  Tab,
+  Tabs
+} from 'react-bootstrap';
 import { 
   GearFill, 
   PeopleFill, 
   FolderFill, 
   PersonPlusFill, 
   PlusCircleFill,
-  HouseFill
+  HouseFill,
+  CashStack
 } from 'react-bootstrap-icons';
 import EmployeeRegistrationModal from '../../pages/Employee/EmployeeRegistrationModal';
 import GroupCreateModal from '../../pages/groups/GroupCreateModal';
+import ViewPayroll from '../../pages/Payroll/ViewPayroll';
 import '../../assets/css/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Tab content components
+  const DashboardContent = () => (
+    <div>
+      <h2 className="mb-4">Admin Dashboard</h2>
+      <Row>
+        <Col md={6} className="mb-4">
+          <Card className="h-100">
+            <Card.Body>
+              <Card.Title>Quick Actions</Card.Title>
+              <Button 
+                variant="primary" 
+                className="me-3 mb-2 d-flex align-items-center"
+                onClick={() => setShowEmployeeModal(true)}
+              >
+                <PersonPlusFill className="me-2" /> Register Employee
+              </Button>
+              <Button 
+                variant="success" 
+                className="d-flex align-items-center"
+                onClick={() => setShowGroupModal(true)}
+              >
+                <PlusCircleFill className="me-2" /> Create Group
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={6} className="mb-4">
+          <Card className="h-100">
+            <Card.Body>
+              <Card.Title>System Overview</Card.Title>
+              <Card.Text>
+                Welcome back, Admin! You have full access to manage the system.
+              </Card.Text>
+              <ul className="list-unstyled">
+                <li className="mb-2"><PeopleFill className="me-2" /> Manage Employees</li>
+                <li className="mb-2"><FolderFill className="me-2" /> View Reports</li>
+                <li><GearFill className="me-2" /> System Settings</li>
+              </ul>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+
+  const EmployeesContent = () => (
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Employee Management</h2>
+        <Button 
+          variant="primary" 
+          onClick={() => setShowEmployeeModal(true)}
+          className="d-flex align-items-center"
+        >
+          <PersonPlusFill className="me-2" /> Add Employee
+        </Button>
+      </div>
+      <Card>
+        <Card.Body>
+          <p>Employee list and management tools would appear here.</p>
+        </Card.Body>
+      </Card>
+    </div>
+  );
+
+  const GroupsContent = () => (
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Group Management</h2>
+        <Button 
+          variant="success" 
+          onClick={() => setShowGroupModal(true)}
+          className="d-flex align-items-center"
+        >
+          <PlusCircleFill className="me-2" /> Create Group
+        </Button>
+      </div>
+      <Card>
+        <Card.Body>
+          <p>Group list and management tools would appear here.</p>
+        </Card.Body>
+      </Card>
+    </div>
+  );
+
+  const PayrollContent = () => (
+    <div>
+      <h2 className="mb-4">Payroll Management</h2>
+      <ViewPayroll />
+    </div>
+  );
+
+  const SettingsContent = () => (
+    <div>
+      <h2 className="mb-4">System Settings</h2>
+      <Card>
+        <Card.Body>
+          <p>System configuration options would appear here.</p>
+        </Card.Body>
+      </Card>
+    </div>
+  );
 
   return (
     <Container fluid className="admin-dashboard">
@@ -55,6 +169,15 @@ const AdminDashboard = () => {
             </Nav.Item>
             <Nav.Item>
               <Nav.Link 
+                active={activeTab === 'payroll'} 
+                onClick={() => setActiveTab('payroll')}
+                className="d-flex align-items-center"
+              >
+                <CashStack className="me-2" /> Payroll
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link 
                 active={activeTab === 'settings'} 
                 onClick={() => setActiveTab('settings')}
                 className="d-flex align-items-center"
@@ -67,103 +190,11 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Col md={9} lg={10} className="main-content p-4">
-          {activeTab === 'dashboard' && (
-            <div>
-              <h2 className="mb-4">Admin Dashboard</h2>
-              <Row>
-                <Col md={6} className="mb-4">
-                  <Card className="h-100">
-                    <Card.Body>
-                      <Card.Title>Quick Actions</Card.Title>
-                      <Button 
-                        variant="primary" 
-                        className="me-3 mb-2 d-flex align-items-center"
-                        onClick={() => setShowEmployeeModal(true)}
-                      >
-                        <PersonPlusFill className="me-2" /> Register Employee
-                      </Button>
-                      <Button 
-                        variant="success" 
-                        className="d-flex align-items-center"
-                        onClick={() => setShowGroupModal(true)}
-                      >
-                        <PlusCircleFill className="me-2" /> Create Group
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={6} className="mb-4">
-                  <Card className="h-100">
-                    <Card.Body>
-                      <Card.Title>System Overview</Card.Title>
-                      <Card.Text>
-                        Welcome back, Admin! You have full access to manage the system.
-                      </Card.Text>
-                      <ul className="list-unstyled">
-                        <li className="mb-2"><PeopleFill className="me-2" /> Manage Employees</li>
-                        <li className="mb-2"><FolderFill className="me-2" /> View Reports</li>
-                        <li><GearFill className="me-2" /> System Settings</li>
-                      </ul>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-            </div>
-          )}
-
-          {activeTab === 'employees' && (
-            <div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Employee Management</h2>
-                <Button 
-                  variant="primary" 
-                  onClick={() => setShowEmployeeModal(true)}
-                  className="d-flex align-items-center"
-                >
-                  <PersonPlusFill className="me-2" /> Add Employee
-                </Button>
-              </div>
-              {/* Employee management content would go here */}
-              <Card>
-                <Card.Body>
-                  <p>Employee list and management tools would appear here.</p>
-                </Card.Body>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === 'groups' && (
-            <div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Group Management</h2>
-                <Button 
-                  variant="success" 
-                  onClick={() => setShowGroupModal(true)}
-                  className="d-flex align-items-center"
-                >
-                  <PlusCircleFill className="me-2" /> Create Group
-                </Button>
-              </div>
-              {/* Group management content would go here */}
-              <Card>
-                <Card.Body>
-                  <p>Group list and management tools would appear here.</p>
-                </Card.Body>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === 'settings' && (
-            <div>
-              <h2 className="mb-4">System Settings</h2>
-              {/* Settings content would go here */}
-              <Card>
-                <Card.Body>
-                  <p>System configuration options would appear here.</p>
-                </Card.Body>
-              </Card>
-            </div>
-          )}
+          {activeTab === 'dashboard' && <DashboardContent />}
+          {activeTab === 'employees' && <EmployeesContent />}
+          {activeTab === 'groups' && <GroupsContent />}
+          {activeTab === 'payroll' && <PayrollContent />}
+          {activeTab === 'settings' && <SettingsContent />}
 
           {/* Modals */}
           <EmployeeRegistrationModal

@@ -2,100 +2,123 @@
 header('Content-Type: application/json');
 session_start();
 
-if(!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'],['admin','hr']))
-{
+if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr'])) {
     echo json_encode([
-            'success'=> false,
-            'message'=> 'Unauthorized Access'
+            'success' => false, 
+            'message' => 'Unauthorized Access'
         ]);
     exit;
 }
 
-if($_SERVER['REQUEST_METHOD'] !== 'POST')
-{
-	echo json_encode(['success' => false, 'message' => 'Invalid Request']);
-	exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode([
+            'success' => false, 
+            'message' => 'Invalid Request'
+        ]);
+    exit;
 }
 
 require_once '../../classes/class_admin.php';
 $admin = new Admin();
 $pdo = $admin->getPDO();
 
-try
-{
-    $name     = $_POST['name'] ?? '';
-    $email    = $_POST['email'] ?? '';
-    $phone    = $_POST['phone'] ?? '';
-    $username = $_POST['username'] ?? '';
+try {
+    // Required Fields
+    $first_name     = $_POST['first_name'] ?? '';
+    $last_name      = $_POST['last_name'] ?? '';
+    $email          = $_POST['email'] ?? '';
+    $phone          = $_POST['phone'] ?? '';
+    $username       = $_POST['username'] ?? '';
+    $department_id  = $_POST['department_id'] ?? '';
 
-    if(!$name || !$email || !$phone || !$username)
-    {
-        echo json_encode([
-                'success'=> false,
-                'message'=> 'All fields are require'
-            ]);
+    // Optional Emergency Fields
+    $emergency_name     = $_POST['emergency_name'] ?? null;
+    $emergency_phone    = $_POST['emergency_phone'] ?? null;
+    $emergency_relation = $_POST['emergency_relation'] ?? null;
+
+    // Basic Validation
+    if (!$first_name || !$last_name || !$email || !$phone || !$username || !$department_id) {
+        echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
+        exit;
     }
 
-    $stmt = $pdo->prepare("INSERT INTO employees (name, email, phone, join_date, status)
-                            VALUES(?, ?, ?, CURDATE(), 'active)");
-    $stmt ->execute([$name, $email, $phone]);
+    // Insert into employees table
+    $stmt = $pdo->prepare("INSERT INTO 
+            employees (first_name, last_name, email, phone, department_id, emergency_name, emergency_phone, emergency_relation, join_date, status)
+            VALUES 
+            (?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), 'active')
+        ");
+    $stmt->execute([
+        $first_name,
+        $last_name,
+        $email,
+        $phone,
+        $department_id,
+        $emergency_name,
+        $emergency_phone,
+        $emergency_relation
+    ]);
+
     $employeeID = $pdo->lastInsertId();
 
-    //Upload documents (Certificate,exprience latter etc.)
+    // File Upload (certificate, experience)
     $uploadDir = '../../assets/documents/';
     $docFiles  = ['certificate', 'experience'];
 
-    foreach ($docFiles as $docType)
-    {
-        if(isset($_FILES[$docType]) &&  $_FILES[$docType]['error'] ===0)
-        {
+    foreach ($docFiles as $docType) {
+        if (isset($_FILES[$docType]) && $_FILES[$docType]['error'] === 0) {
             $filename = time() . '_' . basename($_FILES[$docType]['name']);
             $filepath = $uploadDir . $filename;
-            
+
             move_uploaded_file($_FILES[$docType]['tmp_name'], $filepath);
 
             $docInsert = $pdo->prepare("INSERT INTO documents(employee_id, doc_type, file_path) VALUES (?, ?, ?)");
-            $docInsert ->execute([$employeeID, $docType, $filename]);
+            $docInsert->execute([$employeeID, $docType, $filename]);
         }
-        
     }
 
-    //Paswword Hashing
-    $rawPassword = bin2hex(random_bytes(4));
-    $hashPassword= password_hash($rawPassword, PASSWORD_DEFAULT);
+    // Generate password and hash
+    $rawPassword = bin2hex(random_bytes(4)); // 8-digit random password
+    $hashPassword = password_hash($rawPassword, PASSWORD_DEFAULT);
 
-    $userInsert  = $pdo->prepare("INSERT INTO users (username, password, role, employee_id, status)
-                                    VALUES (?, ?, 'employee', ?, 'active')");
-    $userInsert  ->execute([$username, $hashPassword, $employeeID]);
+    // Insert into users table
+    $userInsert = $pdo->prepare("INSERT INTO users (username, password, role, employee_id, status)
+                                 VALUES (?, ?, 'employee', ?, 'active')");
+    $userInsert->execute([$username, $hashPassword, $employeeID]);
 
-    //Mail send to employee
+    // Send email
     $subject = "Your Employee Account is Ready";
     $message = "
-                //message here
-                ";
-    $mailSend= $admin->sendMail($email, $message, $subject);
+            Dear $first_name $last_name,
 
-    if($mailSend)
-    {
+            Your employee account has been created successfully.
+
+            Username: $username
+            Temporary Password: $rawPassword
+
+            Please login and change your password immediately.
+
+            Thank you,
+            HR/Admin Team
+        ";
+
+    $mailSend = $admin->sendMail($email, $message, $subject);
+
+    if ($mailSend) {
         echo json_encode([
-                'success'=> true,
-                'message'=> 'Employee registered and mail send successfully'
+                'success' => true, 
+                'message' => 'Employee registered and mail sent successfully'
             ]);
-    }
-    else
-    {
+    } else {
         echo json_encode([
-                'success'=> true,
-                'message'=> 'Employee registered but mail not sent'
-            ]);   
-    
+            'success' => true, 
+            'message' => 'Employee registered but mail not sent'
+        ]);
     }
 
-}
-catch (Exception $e)
-{
+} catch (Exception $e) {
     echo json_encode([
-                'success'=> true,
-                'message'=> 'Error:' .$e->getMessage()
-            ]);
+            'success' => false, 
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
 }

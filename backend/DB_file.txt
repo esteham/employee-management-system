@@ -9,6 +9,22 @@ CREATE TABLE employees (
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 			);
 
+			ALTER TABLE employees 
+			ADD COLUMN first_name VARCHAR(100), 
+			ADD COLUMN last_name VARCHAR(100), 
+			ADD COLUMN department_id INT, 
+			DROP COLUMN name;
+			ADD COLUMN emergency_name VARCHAR(100) NULL,
+			ADD COLUMN emergency_phone VARCHAR(20) NULL,
+			ADD COLUMN emergency_relation VARCHAR(50) NULL;
+
+			ALTER TABLE employees
+			ADD CONSTRAINT fk_department
+			FOREIGN KEY (department_id)
+			REFERENCES departments(id)
+			ON DELETE SET NULL
+			ON UPDATE CASCADE;
+
 CREATE TABLE users (
 			id INT AUTO_INCREMENT PRIMARY KEY,
     		username VARCHAR(100) UNIQUE NOT NULL,
@@ -100,4 +116,9 @@ CREATE TABLE holidays (
 CREATE TABLE weekends (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			day_of_week ENUM('Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday') UNIQUE
+			);
+
+CREATE TABLE departments (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			name VARCHAR(100) NOT NULL
 			);

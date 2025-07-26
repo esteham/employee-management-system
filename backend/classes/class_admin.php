@@ -332,6 +332,32 @@ class Admin
         $stmt = $this->pdo->query("SELECT day_of_week FROM weekens ORDER BY ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    /* =======================
+    End Holiday and Weekend Select
+    ===========================*/
+
+    /* =================
+    Group create functio
+    ====================*/
+    public function createGroup($group_name, $description, $created_by)
+    {
+        $stmt = $this->pdo->prepare("INSERT INTO groups (group_name, description, created_by) VALUES (?, ?, ?)");
+        $stmt ->execute([$group_name, $description, $created_by]);
+        return $this->pdo->lastInsertId();
+    }
+
+    public function addEmployeesToGroup($group_id, $employee_ids = [])
+    {
+        $stmt = $this->pdo->prepare("INSERT INTO group_members (group_id, employee_id) VALUES (?, ?)");
+
+        foreach ($employee_ids as $emp_id)
+        {
+            $stmt ->execute([$group_id, $emp_id]);
+        }
+
+        return true;
+
+    }
 
 
 }

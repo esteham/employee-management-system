@@ -3,9 +3,9 @@ import { Form, Card, Button, Alert, Spinner, Table } from 'react-bootstrap';
 
 const ViewPayroll = () => {
     const [formData, setFormData] = useState({
-        employee_id: '',
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear()
+        employee_id : '',
+        month       : new Date().getMonth() + 1,
+        year        : new Date().getFullYear()
     });
 
     const [payrollData, setPayrollData] = useState(null);

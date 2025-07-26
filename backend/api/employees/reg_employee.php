@@ -64,6 +64,9 @@ try {
 
     // File Upload (certificate, experience)
     $uploadDir = '../../assets/documents/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
     $docFiles  = ['certificate', 'experience'];
 
     foreach ($docFiles as $docType) {

@@ -457,29 +457,44 @@ class Admin
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getDepartmentById($id) {
+    public function getDepartmentById($id) 
+    {
         $sql = "SELECT id, name FROM departments WHERE id = ?";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function createDepartment($name) {
+    public function createDepartment($name) 
+    {
         $sql = "INSERT INTO departments (name) VALUES (?)";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([$name]);
     }
 
-    public function updateDepartment($id, $name) {
+    public function updateDepartment($id, $name) 
+    {
         $sql = "UPDATE departments SET name = ? WHERE id = ?";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([$name, $id]);
     }
 
-    public function deleteDepartment($id) {
+    public function deleteDepartment($id) 
+    {
         $sql = "DELETE FROM departments WHERE id = ?";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([$id]);
+    }
+
+    public function getEmployeesByDepartment($department_id)
+    {
+        $sql = "SELECT e.id, e.first_name, e.last_name, e.email, e.phone, d.name AS department_name
+                FROM employees e
+                LEFT JOIN departments d ON e.department_id = d.id
+                WHERE e.department_id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$department_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* =====================

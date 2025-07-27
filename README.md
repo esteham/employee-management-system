@@ -171,4 +171,4 @@ MIT
 
 ## Contact
 
-For any queries, contact [your-email@example.com](mailto:your-email@example.com)
+For any queries, contact [spider@xetroot.com](mailto:spider@xetroot.com)

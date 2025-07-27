@@ -56,7 +56,7 @@ try
     }
 
     echo json_encode([
-            'success' => false, 
+            'success' => true, 
             'groups' => $result
         ]);
 

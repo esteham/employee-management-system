@@ -6,6 +6,7 @@ import {
   FolderFill,
   HouseFill,
   CashStack,
+  Building // Building icon for departments
 } from "react-bootstrap-icons";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
@@ -40,6 +41,15 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             className="d-flex align-items-center"
           >
             <FolderFill className="me-2" /> Groups
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link
+            active={activeTab === "departments"}
+            onClick={() => setActiveTab("departments")}
+            className="d-flex align-items-center"
+          >
+            <Building className="me-2" /> Departments
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>

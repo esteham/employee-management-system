@@ -415,6 +415,48 @@ class Admin
         return true;
 
     }
+    /* =====================
+    End Group functio
+    ========================*/
+
+    /* =====================
+    Department functio
+    ========================*/
+     public function getAllDepartments() {
+        $sql = "SELECT id, name FROM departments ORDER BY name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getDepartmentById($id) {
+        $sql = "SELECT id, name FROM departments WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function createDepartment($name) {
+        $sql = "INSERT INTO departments (name) VALUES (?)";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$name]);
+    }
+
+    public function updateDepartment($id, $name) {
+        $sql = "UPDATE departments SET name = ? WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$name, $id]);
+    }
+
+    public function deleteDepartment($id) {
+        $sql = "DELETE FROM departments WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$id]);
+    }
+
+    /* =====================
+    End Department functio
+    ========================*/
 
 
 }

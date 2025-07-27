@@ -20,7 +20,7 @@ $options= [
 
 
     //Admin Credentials
-    $username       = 'spider';
+    $username       = 'admin';
     $raw_password   = '09876543';
     $hashed_password= password_hash($raw_password, PASSWORD_DEFAULT);
     $role           = 'admin';

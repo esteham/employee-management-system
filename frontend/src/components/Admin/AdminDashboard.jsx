@@ -7,9 +7,12 @@ import EmployeesContent from "./EmployeesContent";
 import GroupsContent from "./GroupsContent";
 import PayrollContent from "./PayrollContent";
 import SettingsContent from "./SettingsContent";
+import DepartmentsContent from "./DepartmentsContent";
 import EmployeeRegistrationModal from "../../pages/Employee/EmployeeRegistrationModal";
 import GroupCreateModal from "../../pages/Groups/GroupCreateModal";
 import GroupEditModal from "../../pages/Groups/GroupEditModal";
+import DepartmentCreateModal from "../../pages/Departments/DepartmentCreateModal";
+import DepartmentEditModal from "../../pages/Departments/DepartmentEditModal";
 import "../../assets/css/AdminDashboard.css";
 
 import ErrorBoundary from "../ErrorBoundary";
@@ -19,18 +22,24 @@ const AdminDashboard = () => {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [editModalShow, setEditModalShow] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
+
   const [activeTab, setActiveTab] = useState("dashboard");
+
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
+
+  const [departments, setDepartments] = useState([]);
+  const [loadingDepartments, setLoadingDepartments] = useState(true);
+  const [showDeptModal, setShowDeptModal] = useState(false);
+  const [deptEditModal, setDeptEditModal] = useState(false);
+  const [selectedDept, setSelectedDept] = useState(null);
 
   const apiURL = import.meta.env.VITE_API_URL;
 
   const fetchGroups = () => {
     setLoadingGroups(true);
     axios
-      .get(`${apiURL}backend/api/groups/view.php`, {
-        withCredentials: true,
-      })
+      .get(`${apiURL}backend/api/groups/view.php`, { withCredentials: true })
       .then((res) => {
         if (res.data.success) {
           setGroups(res.data.groups);
@@ -45,8 +54,29 @@ const AdminDashboard = () => {
       });
   };
 
+  const fetchDepartments = () => {
+    setLoadingDepartments(true);
+    axios
+      .get(`${apiURL}backend/api/department/fetctDepartment.php`, { 
+        withCredentials: true 
+      })
+      .then((res) => {
+        if (res.data.success) {
+          setDepartments(res.data.departments);
+        } else {
+          console.error("Failed to fetch departments:", res.data.message);
+        }
+        setLoadingDepartments(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching departments:", err);
+        setLoadingDepartments(false);
+      });
+  };
+
   useEffect(() => {
     fetchGroups();
+    fetchDepartments();
   }, []);
 
   const handleDeleteGroup = async (id) => {
@@ -71,13 +101,35 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteDepartment = async (id) => {
+    if (!window.confirm("Are you sure to delete this department?")) return;
+
+    try {
+      const res = await axios.post(`${apiURL}backend/api/department/delete.php`, {
+        id,
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        const updated = departments.filter(dept => dept.id !== id);
+        setDepartments(updated);
+      } else {
+        alert(res.data.message);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
   return (
     <Container fluid className="admin-dashboard">
       <Row>
         <ErrorBoundary>
-  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-</ErrorBoundary>
-        
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        </ErrorBoundary>
+
         <Col md={9} lg={10} className="main-content p-4">
           {activeTab === "dashboard" && (
             <DashboardContent 
@@ -85,9 +137,11 @@ const AdminDashboard = () => {
               setShowGroupModal={setShowGroupModal}
             />
           )}
+
           {activeTab === "employees" && (
             <EmployeesContent setShowEmployeeModal={setShowEmployeeModal} />
           )}
+
           {activeTab === "groups" && (
             <GroupsContent
               groups={groups}
@@ -98,6 +152,18 @@ const AdminDashboard = () => {
               handleDeleteGroup={handleDeleteGroup}
             />
           )}
+
+          {activeTab === "departments" && (
+            <DepartmentsContent
+              departments={departments}
+              loading={loadingDepartments}
+              setShowCreateModal={setShowDeptModal}
+              setEditModalShow={setDeptEditModal}
+              setSelectedDept={setSelectedDept}
+              handleDelete={handleDeleteDepartment}
+            />
+          )}
+
           {activeTab === "payroll" && <PayrollContent />}
           {activeTab === "settings" && <SettingsContent />}
 
@@ -115,6 +181,19 @@ const AdminDashboard = () => {
               handleClose={() => setEditModalShow(false)}
               groupData={selectedGroup}
               refreshGroups={fetchGroups}
+            />
+          )}
+          <DepartmentCreateModal
+            show={showDeptModal}
+            handleClose={() => setShowDeptModal(false)}
+            refreshDepartments={fetchDepartments}
+          />
+          {selectedDept && (
+            <DepartmentEditModal
+              show={deptEditModal}
+              handleClose={() => setDeptEditModal(false)}
+              departmentData={selectedDept}
+              refreshDepartments={fetchDepartments}
             />
           )}
         </Col>

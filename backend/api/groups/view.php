@@ -23,6 +23,7 @@ try
                         g.description,
                         g.created_by,
                         u.username AS created_by_username,
+                        u.role AS created_by_role,
                         g.created_at
                     FROM groups g
                     JOIN users u ON g.created_by = u.id
@@ -49,7 +50,8 @@ try
                     'group_id'      => $group['id'],
                     'group_name'    => $group['group_name'],
                     'description'   => $group['description'],
-                    'created_ay'    => $group['created_by_username'],
+                    'created_by'    => $group['created_by_username'],
+                    'created_role'  => $group['created_by_role'], 
                     'created_at'    => $group['created_at'],
                     'members'       => $members
             ];

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext"; // ✅ Import useAuth with AuthProvider
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -12,12 +12,11 @@ import About from './components/About';
 import Contact from './components/Contact';
 import LoginFetch from './pages/LoginFetch';
 import ViewPayroll from './pages/Payroll/ViewPayroll';
-import HrDashboard from './pages/Dashboard/HrDashboard';
-import AdminDashboard from './pages/Dashboard/AdminDashboard';
-import EmployeeDashboard from './pages/Dashboard/EmployeeDashboard';
+import HrDashboard from './components/HR/HrDashboard';
+import AdminDashboard from './components/Admin/AdminDashboard';
+import EmployeeDashboard from './components/Employee/EmployeeDashboard';
 
-
-// ✅ ProtectedRoute Component with loading check
+// ProtectedRoute Component with loading check
 const ProtectedRoute = ({ children, roles }) => {
   const { user, loading } = useAuth();
 
@@ -40,7 +39,7 @@ const ProtectedRoute = ({ children, roles }) => {
   return children;
 };
 
-// ✅ Role-based dynamic redirect
+// Role-based dynamic redirect
 const RoleDashboard = () => {
   const { user } = useAuth();
 

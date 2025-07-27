@@ -105,6 +105,34 @@ class Admin
     End Send mail function
     ====================*/
 
+    /*=============
+    GetAllEmployees
+    ==============*/
+    public function getAllEmployees() 
+    {
+        $sql = "SELECT e.*, d.name AS department_name, u.role AS user_role
+                FROM employees e
+                LEFT JOIN departments d ON e.department_id = d.id
+                LEFT JOIN users u ON e.id = u.employee_id
+                ORDER BY e.id DESC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // deleteEmployeeById
+    public function deleteEmployeeById($id) 
+    {
+        $sql = "DELETE FROM employees WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$id]);
+    }
+
+    /*================
+    End getAllEmployees
+    =================*/
+
+
     /* ================
     Record Attendance
     =====================*/

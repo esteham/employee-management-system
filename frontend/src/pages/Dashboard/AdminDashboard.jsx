@@ -7,8 +7,7 @@ import {
   Col,
   Card,
   Nav,
-  Tab,
-  Tabs,
+  Form
 } from "react-bootstrap";
 import {
   GearFill,
@@ -18,19 +17,75 @@ import {
   PlusCircleFill,
   HouseFill,
   CashStack,
+  PencilSquare,
+  TrashFill
 } from "react-bootstrap-icons";
+
 import EmployeeRegistrationModal from "../../pages/Employee/EmployeeRegistrationModal";
 import GroupCreateModal from "../Groups/GroupCreateModal";
+import GroupEditModal from "../../pages/Groups/GroupEditModal";
 import ViewPayroll from "../../pages/Payroll/ViewPayroll";
 import "../../assets/css/AdminDashboard.css";
 
 const AdminDashboard = () => {
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const [editModalShow, setEditModalShow] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  const [groups, setGroups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const apiURL = import.meta.env.VITE_API_URL;
 
-  // Tab content components
+  const fetchGroups = () => {
+    setLoadingGroups(true);
+    axios
+      .get(`${apiURL}backend/api/groups/view.php`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        if (res.data.success) {
+          setGroups(res.data.groups);
+        } else {
+          console.error("Failed to fetch groups:", res.data.message);
+        }
+        setLoadingGroups(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching groups:", err);
+        setLoadingGroups(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const handleDeleteGroup = async (id) => {
+    if (!window.confirm("Are you sure to delete this group?")) return;
+
+    try {
+      const res = await axios.post(`${apiURL}backend/api/groups/delete.php`, {
+        id: id,
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        const updated = groups.filter(group => group.group_id !== id);
+        setGroups(updated);
+      } else {
+        alert(res.data.message);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
   const DashboardContent = () => (
     <div>
       <h2 className="mb-4">Admin Dashboard</h2>
@@ -81,6 +136,87 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const GroupsContent = () => {
+    const filteredGroups = groups.filter(group =>
+      group.group_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+      <div>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2>Group Management</h2>
+          <Button
+            variant="success"
+            onClick={() => setShowGroupModal(true)}
+            className="d-flex align-items-center"
+          >
+            <PlusCircleFill className="me-2" /> Create Group
+          </Button>
+        </div>
+
+        <Form.Control
+          type="text"
+          placeholder="Search group by name..."
+          className="mb-4"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        {loadingGroups ? (
+          <p>Loading groups...</p>
+        ) : (
+          <Row>
+            {filteredGroups.length > 0 ? (
+              filteredGroups.map((group) => (
+                <Col md={6} key={group.group_id} className="mb-4">
+                  <Card>
+                    <Card.Body>
+                      <Card.Title>{group.group_name}</Card.Title>
+                      <Card.Subtitle className="mb-2 text-muted">
+                        Created by: {group.created_by} <br />
+                        On: {new Date(group.created_at).toLocaleDateString()}
+                      </Card.Subtitle>
+                      <Card.Text>{group.description}</Card.Text>
+                      <strong>Members:</strong>
+                      <ul>
+                        {group.members.map((member) => (
+                          <li key={member.id}>
+                            {member.first_name} ({member.email})
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="d-flex gap-2 mt-3">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedGroup(group);
+                            setEditModalShow(true);
+                          }}
+                        >
+                          <PencilSquare className="me-2" /> Edit
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleDeleteGroup(group.group_id)}
+                        >
+                          <TrashFill className="me-2" /> Delete
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              <p>No groups found.</p>
+            )}
+          </Row>
+        )}
+      </div>
+    );
+  };
+
   const EmployeesContent = () => (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -100,78 +236,6 @@ const AdminDashboard = () => {
       </Card>
     </div>
   );
-
-  const GroupsContent = () => {
-    const [groups, setGroups] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-      axios
-        .get(`${apiURL}backend/api/groups/view.php`, {
-          withCredentials: true,
-        })
-        .then((res) => {
-          if (res.data.success) {
-            setGroups(res.data.groups);
-          } else {
-            console.error("Failed to fetch groups:", res.data.message);
-          }
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error:", err);
-          setLoading(false);
-        });
-    }, []);
-
-    return (
-      <div>
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Group Management</h2>
-          <Button
-            variant="success"
-            onClick={() => setShowGroupModal(true)}
-            className="d-flex align-items-center"
-          >
-            <PlusCircleFill className="me-2" /> Create Group
-          </Button>
-        </div>
-
-        {loading ? (
-          <p>Loading groups...</p>
-        ) : (
-          <Row>
-            {groups.length > 0 ? (
-              groups.map((group) => (
-                <Col md={6} key={group.group_id} className="mb-4">
-                  <Card>
-                    <Card.Body>
-                      <Card.Title>{group.group_name}</Card.Title>
-                      <Card.Subtitle className="mb-2 text-muted">
-                        Created by: {group.created_ay} <br />
-                        On: {new Date(group.created_at).toLocaleDateString()}
-                      </Card.Subtitle>
-                      <Card.Text>{group.description}</Card.Text>
-                      <strong>Members:</strong>
-                      <ul>
-                        {group.members.map((member) => (
-                          <li key={member.id}>
-                            {member.first_name} ({member.email})
-                          </li>
-                        ))}
-                      </ul>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))
-            ) : (
-              <p>No groups found.</p>
-            )}
-          </Row>
-        )}
-      </div>
-    );
-  };
 
   const PayrollContent = () => (
     <div>
@@ -265,6 +329,14 @@ const AdminDashboard = () => {
             show={showGroupModal}
             handleClose={() => setShowGroupModal(false)}
           />
+          {selectedGroup && (
+            <GroupEditModal
+              show={editModalShow}
+              handleClose={() => setEditModalShow(false)}
+              groupData={selectedGroup}
+              refreshGroups={fetchGroups}
+            />
+          )}
         </Col>
       </Row>
     </Container>

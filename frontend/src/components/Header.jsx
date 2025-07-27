@@ -11,7 +11,7 @@ const Header = () => {
     navigate("/");
   };
 
-  if (loading) return null; // ✅ prevent flicker on refresh
+  if (loading) return null;
 
   return (
     <header className="header">
@@ -28,12 +28,11 @@ const Header = () => {
         </label>
 
         <ul className="nav-links">
-          <li>
-            <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Home</NavLink>
-          </li>
-
           {!user && (
             <>
+              <li>
+                <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Home</NavLink>
+              </li>
               <li>
                 <NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>About</NavLink>
               </li>
@@ -77,6 +76,7 @@ const Header = () => {
             </li>
           )}
         </ul>
+
       </nav>
     </header>
   );

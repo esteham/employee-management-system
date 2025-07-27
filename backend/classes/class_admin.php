@@ -221,6 +221,54 @@ class Admin
 		return $stmt->rowCount() > 0;
 	}
 
+    public function fetchPayrollData($employeeID, $month, $year)
+    {
+        // Get basic salary and overtime rate
+        $stmt = $this->pdo->prepare("SELECT basic_salary, overtime_rate FROM salary_structure WHERE employee_id = ?");
+        $stmt->execute([$employeeID]);
+        $salaryData = $stmt->fetch();
+
+        if(!$salaryData) {
+            return ['success' => false, 'message' => 'Salary structure not found'];
+        }
+
+        $basicSalary = $salaryData['basic_salary'];
+        $overtimeRate = $salaryData['overtime_rate'];
+
+        // Check if payroll already exists for this month and year
+        $payrollStmt = $this->pdo->prepare("SELECT * FROM payroll WHERE employee_id = ? AND month = ? AND year = ? LIMIT 1");
+        $payrollStmt->execute([$employeeID, $month, $year]);
+        $payroll = $payrollStmt->fetch();
+
+        // If payroll exists, load values, else default zero for bonus, deduction, overtime
+        $bonus = $payroll['bonus'] ?? 0;
+        $deduction = $payroll['deduction'] ?? 0;
+        $overtime = $payroll ? $payroll['overtime'] / $overtimeRate : 0;  // convert overtime pay to hours (assuming overtime stored as pay)
+
+        // Get employee name
+        $empStmt = $this->pdo->prepare("SELECT first_name FROM employees WHERE id = ?");
+        $empStmt->execute([$employeeID]);
+        $employee = $empStmt->fetch();
+        $employeeName = $employee ? $employee['first_name'] : 'Unknown';
+
+        // Calculate net salary (basic + bonus + overtime pay - deduction)
+        $overtimePay = $overtime * $overtimeRate;
+        $netSalary = $basicSalary + $bonus + $overtimePay - $deduction;
+
+        return [
+            'success' => true,
+            'employee_name' => $employeeName,
+            'details' => [
+                'basic_salary' => $basicSalary,
+                'bonus' => $bonus,
+                'deduction' => $deduction,
+                'overtime' => $overtime,
+            ],
+            'net_salary' => $netSalary
+        ];
+    }
+
+
 	public function generatePayroll($employeeID, $month, $year, $bonus = 0, $deduction = 0, $overTimeHours = 0)
     {
         // Get basic salary and overtime rate
@@ -291,7 +339,15 @@ class Admin
     /* ================
     Generate Payroll Reports
     =====================*/
-    public function getPayrollReport($month, $year)
+    public function getMonthYearById($id)
+    {
+        $sql = "SELECT month, year FROM payroll WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getPayrollReportByMonthYear($month, $year)
     {
         $sql = "SELECT
                     p.id,
@@ -305,15 +361,16 @@ class Admin
                     p.deduction,
                     p.late_fine,
                     p.net_salary,
-                    p.generated_at 
-
-                    FROM payroll p JOIN employees e ON p.employee_id = e.id WHERE p.month = ? AND p.year = ?
-                    ORDER BY e.first_name ASC";
+                    p.generated_at
+                FROM payroll p
+                JOIN employees e ON p.employee_id = e.id
+                WHERE p.month = ? AND p.year = ?
+                ORDER BY e.first_name ASC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$month, $year]);
-
         return $stmt->fetchAll();
     }
+
     /* ================
     End Generate Payroll Reports
     =====================*/

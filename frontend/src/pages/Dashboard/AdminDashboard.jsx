@@ -24,7 +24,7 @@
 // import EmployeeRegistrationModal from "../../pages/Employee/EmployeeRegistrationModal";
 // import GroupCreateModal from "../Groups/GroupCreateModal";
 // import GroupEditModal from "../../pages/Groups/GroupEditModal";
-// import ViewPayroll from "../../pages/Payroll/ViewPayroll";
+// import GeneratePayroll from "../../pages/Payroll/GeneratePayroll";
 // import "../../assets/css/AdminDashboard.css";
 
 // const AdminDashboard = () => {
@@ -240,7 +240,7 @@
 //   const PayrollContent = () => (
 //     <div>
 //       <h2 className="mb-4">Payroll Management</h2>
-//       <ViewPayroll />
+//       <GeneratePayroll />
 //     </div>
 //   );
 

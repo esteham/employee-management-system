@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Card, Button, Alert, Spinner, Table } from 'react-bootstrap';
 
-const ViewPayroll = () => {
+const GeneratePayroll = () => {
     const [formData, setFormData] = useState({
-        employee_id : '',
-        month       : new Date().getMonth() + 1,
-        year        : new Date().getFullYear()
+        employee_id: '',
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear()
     });
 
     const [payrollData, setPayrollData] = useState(null);
@@ -13,6 +13,7 @@ const ViewPayroll = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingReport, setLoadingReport] = useState(false);
+    const [loadingFetch, setLoadingFetch] = useState(false);
     const apiURL = import.meta.env.VITE_API_URL;
 
     const handleChange = (e) => {
@@ -23,10 +24,32 @@ const ViewPayroll = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handlePayrollChange = (e) => {
+        const { name, value } = e.target;
+        setPayrollData(prev => ({
+            ...prev,
+            [name]: value === '' ? '' : Number(value)
+        }));
+    };
+
+    // Auto calculate net salary on payrollData change
+    useEffect(() => {
+        if (payrollData) {
+            const { basic_salary = 0, bonus = 0, deduction = 0, overtime = 0 } = payrollData;
+            const net_salary = (basic_salary + bonus + overtime) - deduction;
+            if (payrollData.net_salary !== net_salary) {
+                setPayrollData(prev => ({
+                    ...prev,
+                    net_salary
+                }));
+            }
+        }
+    }, [payrollData?.basic_salary, payrollData?.bonus, payrollData?.deduction, payrollData?.overtime]);
+
+    // Fetch payroll data before generating
+    const handleFetchPayrollData = async () => {
         setError(null);
-        setLoading(true);
+        setLoadingFetch(true);
         setPayrollData(null);
         setReportData(null);
 
@@ -35,7 +58,7 @@ const ViewPayroll = () => {
                 throw new Error('Employee ID is required');
             }
 
-            const response = await fetch(`${apiURL}backend/api/payroll/generate.php`, {
+            const response = await fetch(`${apiURL}backend/api/payroll/fetch_employee_payroll.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -55,11 +78,63 @@ const ViewPayroll = () => {
             }
 
             setPayrollData({
+                employee_id: formData.employee_id,
+                employee_name: data.employee_name,
+                basic_salary: data.details.basic_salary,
+                bonus: data.details.bonus,
+                deduction: data.details.deduction,
+                overtime: data.details.overtime,
+                net_salary: data.net_salary
+            });
+        } catch (err) {
+            setError(err.message || 'An error occurred while fetching payroll data');
+        } finally {
+            setLoadingFetch(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
+        setReportData(null);
+
+        try {
+            if (!formData.employee_id) {
+                throw new Error('Employee ID is required');
+            }
+            if (!payrollData) {
+                throw new Error('Please fetch payroll data before generating');
+            }
+
+            const response = await fetch(`${apiURL}backend/api/payroll/generate.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
                     employee_id: formData.employee_id,
-                    employee_name: data.employee_name,
-                    net_salary: data.net_salary,
-                    ...data.details
-                });
+                    month: formData.month,
+                    year: formData.year,
+                    bonus: payrollData.bonus,
+                    deduction: payrollData.deduction,
+                    overtime: payrollData.overtime
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Failed to generate payroll');
+            }
+
+            // Update payrollData with returned data (optional)
+            setPayrollData(prev => ({
+                ...prev,
+                net_salary: data.net_salary,
+                employee_name: data.employee_name
+            }));
         } catch (err) {
             setError(err.message || 'An error occurred while generating payroll');
         } finally {
@@ -81,8 +156,7 @@ const ViewPayroll = () => {
                 },
                 credentials: 'include',
                 body: JSON.stringify({
-                    month: formData.month,
-                    year: formData.year
+                    id: formData.employee_id,
                 })
             });
 
@@ -100,7 +174,6 @@ const ViewPayroll = () => {
         }
     };
 
-    // Helper function to format currency
     const formatCurrency = (value) => {
         return (value || 0).toLocaleString('en-US', {
             style: 'currency',
@@ -164,17 +237,33 @@ const ViewPayroll = () => {
 
                 <div className="d-flex gap-2 mt-3">
                     <Button 
+                        type="button"
+                        variant="info"
+                        className="flex-grow-1"
+                        onClick={handleFetchPayrollData}
+                        disabled={loading || loadingReport || loadingFetch}
+                    >
+                        {loadingFetch ? (
+                            <>
+                                <Spinner animation="border" size="sm" /> Fetching...
+                            </>
+                        ) : (
+                            'Fetch Payroll Data'
+                        )}
+                    </Button>
+
+                    <Button 
                         type="submit"
                         variant="primary"
                         className="flex-grow-1"
-                        disabled={loading || loadingReport}
+                        disabled={loading || loadingReport || loadingFetch || !payrollData}
                     >
                         {loading ? (
                             <>
                                 <Spinner animation="border" size="sm" /> Generating...
                             </>
                         ) : (
-                            'Generate'
+                            'Generate Payroll'
                         )}
                     </Button>
 
@@ -183,7 +272,7 @@ const ViewPayroll = () => {
                         variant="secondary"
                         className="flex-grow-1"
                         onClick={handleReportView}
-                        disabled={loading || loadingReport}
+                        disabled={loading || loadingReport || loadingFetch}
                     >
                         {loadingReport ? (
                             <>
@@ -215,19 +304,47 @@ const ViewPayroll = () => {
                             </tr>
                             <tr>
                                 <td>Basic Salary</td>
-                                <td>{formatCurrency(payrollData.basic_salary)}</td>
+                                <td>
+                                    <Form.Control
+                                        type="number"
+                                        name="basic_salary"
+                                        value={payrollData.basic_salary || ''}
+                                        disabled 
+                                    />
+                                </td>
                             </tr>
                             <tr>
                                 <td>Bonus</td>
-                                <td>{formatCurrency(payrollData.bonus)}</td>
+                                <td>
+                                    <Form.Control
+                                        type="number"
+                                        name="bonus"
+                                        value={payrollData.bonus || ''}
+                                        onChange={handlePayrollChange}
+                                    />
+                                </td>
                             </tr>
                             <tr>
                                 <td>Deductions</td>
-                                <td>{formatCurrency(payrollData.deduction)}</td>
+                                <td>
+                                    <Form.Control
+                                        type="number"
+                                        name="deduction"
+                                        value={payrollData.deduction || ''}
+                                        onChange={handlePayrollChange}
+                                    />
+                                </td>
                             </tr>
                             <tr>
                                 <td>Overtime</td>
-                                <td>{formatCurrency(payrollData.overtime)}</td>
+                                <td>
+                                    <Form.Control
+                                        type="number"
+                                        name="overtime"
+                                        value={payrollData.overtime || ''}
+                                        onChange={handlePayrollChange}
+                                    />
+                                </td>
                             </tr>
                             <tr className="table-primary">
                                 <td><strong>Net Salary</strong></td>
@@ -282,4 +399,4 @@ const ViewPayroll = () => {
     );
 };
 
-export default ViewPayroll;
+export default GeneratePayroll;

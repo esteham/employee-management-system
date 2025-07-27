@@ -11,7 +11,7 @@ import Home from './components/Home';
 import About from './components/About';
 import Contact from './components/Contact';
 import LoginFetch from './pages/LoginFetch';
-import ViewPayroll from './pages/Payroll/ViewPayroll';
+import GeneratePayroll from './pages/Payroll/GeneratePayroll';
 import HrDashboard from './components/HR/HrDashboard';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import EmployeeDashboard from './components/Employee/EmployeeDashboard';
@@ -69,9 +69,9 @@ function App() {
           <Route path="/LoginFetch" element={<LoginFetch />} />
 
           {/* Protected Routes */}
-          <Route path="/ViewPayroll" element={
+          <Route path="/GeneratePayroll" element={
             <ProtectedRoute roles={['admin', 'hr']}>
-              <ViewPayroll />
+              <GeneratePayroll />
             </ProtectedRoute>
           } />
 

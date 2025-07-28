@@ -22,6 +22,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: "groups", icon: FolderFill, label: "Groups" },
     { id: "departments", icon: Building, label: "Departments" },
     { id: "payroll", icon: CashStack, label: "Payroll" },
+    { id: "tasks", icon: FolderFill, label: "Tasks" },
     { id: "settings", icon: GearFill, label: "Settings" },
   ];
 

@@ -434,25 +434,40 @@ class Admin
     /* =================
     Group create functio
     ====================*/
-    public function createGroup($group_name, $description, $created_by)
-    {
+    public function createGroup($group_name, $description, $created_by){
         $stmt = $this->pdo->prepare("INSERT INTO groups (group_name, description, created_by) VALUES (?, ?, ?)");
         $stmt ->execute([$group_name, $description, $created_by]);
         return $this->pdo->lastInsertId();
     }
 
-    public function addEmployeesToGroup($group_id, $employee_ids = [])
-    {
+    public function addEmployeesToGroup($group_id, $employee_ids = []){
         $stmt = $this->pdo->prepare("INSERT INTO group_members (group_id, employee_id) VALUES (?, ?)");
 
         foreach ($employee_ids as $emp_id)
         {
             $stmt ->execute([$group_id, $emp_id]);
         }
-
         return true;
-
     }
+
+    public function getAllGroups() {
+        $sql = "SELECT id, group_name FROM groups ORDER BY group_name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getEmployeesByGroupId($group_id) {
+        $sql = "SELECT e.id, e.first_name, e.last_name, e.email
+                FROM group_members gm
+                JOIN employees e ON gm.employee_id = e.id
+                WHERE gm.group_id = ?";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$group_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /* =====================
     End Group functio
     ========================*/
@@ -460,7 +475,7 @@ class Admin
     /* =====================
     Department functio
     ========================*/
-     public function getAllDepartments() {
+    public function getAllDepartments() {
         $sql = "SELECT id, name FROM departments ORDER BY name ASC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();

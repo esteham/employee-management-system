@@ -1,4 +1,5 @@
 <?php
+//fetchAllGroups
 require_once '../config/init.php';
 
 if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['admin', 'hr'])) {
@@ -12,11 +13,10 @@ $admin = new Admin();
 $pdo = $admin->getPDO();
 
 try {
-    $departments = $admin->getAllDepartments();
+    $groups = $admin->getAllGroups();
     echo json_encode([
             'success' => true, 
-            'departments' => $departments
-        ]);
+            'groups' => $groups]);
 } catch (Exception $e) {
     echo json_encode([
             'success' => false, 

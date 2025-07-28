@@ -74,7 +74,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
       });
   };
 
-  // Department select করলে ঐ department এর employee গুলো fetch করব
+  // When a department is selected, fetch employees for that department
   const handleDepartmentChange = (e) => {
   const deptId = e.target.value;
   setSelectedDept(deptId);

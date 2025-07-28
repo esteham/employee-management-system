@@ -25,13 +25,19 @@ const GroupsContent = ({
 
   // Excel Download Function
   const handleDownloadExcel = (group) => {
-    const data = group.members.map((member) => ({
-      ID: member.id,
-      Name: member.first_name,
-      Email: member.email,
-    }));
+    const rows = [
+      ["Employee List"], 
+      [`Group: ${group.group_name}`], 
+      [], 
+      ["ID", "Name", "Email"], 
+      ...group.members.map((member) => [
+        member.id,
+        member.first_name,
+        member.email,
+      ]),
+    ];
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       workbook,
@@ -42,7 +48,7 @@ const GroupsContent = ({
   };
 
   return (
-    <div>
+    <div translate="no">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Group Management</h2>
@@ -76,8 +82,7 @@ const GroupsContent = ({
                   <Card.Body>
                     <Card.Title>{group.group_name}</Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
-                      Created by: {group.created_by} ({group.created_role})
-                      <br />
+                      Created by: {group.created_by} ({group.created_role})<br />
                       On: {new Date(group.created_at).toLocaleDateString()}
                     </Card.Subtitle>
                     <Card.Text>{group.description}</Card.Text>
@@ -90,16 +95,12 @@ const GroupsContent = ({
                         size="sm"
                         onClick={() =>
                           setExpandedGroupId(
-                            expandedGroupId === group.group_id
-                              ? null
-                              : group.group_id
+                            expandedGroupId === group.group_id ? null : group.group_id
                           )
                         }
                       >
                         <EyeFill className="me-2" />
-                        {expandedGroupId === group.group_id
-                          ? "Hide Details"
-                          : "Details"}
+                        {expandedGroupId === group.group_id ? "Hide Details" : "Details"}
                       </Button>
 
                       {/* Edit */}

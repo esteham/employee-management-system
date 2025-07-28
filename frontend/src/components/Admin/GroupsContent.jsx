@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { Button, Row, Col, Card, Form } from "react-bootstrap";
-import { PlusCircleFill, PencilSquare, TrashFill } from "react-bootstrap-icons";
+import {
+  PlusCircleFill,
+  PencilSquare,
+  TrashFill,
+  EyeFill,
+} from "react-bootstrap-icons";
+import * as XLSX from "xlsx";
 
 const GroupsContent = ({
   groups,
@@ -11,13 +17,33 @@ const GroupsContent = ({
   handleDeleteGroup,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedGroupId, setExpandedGroupId] = useState(null);
 
   const filteredGroups = groups.filter((group) =>
     group.group_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Excel Download Function
+  const handleDownloadExcel = (group) => {
+    const data = group.members.map((member) => ({
+      ID: member.id,
+      Name: member.first_name,
+      Email: member.email,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      `Employee list of group ${group.group_name}`
+    );
+    XLSX.writeFile(workbook, `Employee_List_${group.group_name}.xlsx`);
+  };
+
   return (
     <div>
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Group Management</h2>
         <Button
@@ -29,6 +55,7 @@ const GroupsContent = ({
         </Button>
       </div>
 
+      {/* Search Field */}
       <Form.Control
         type="text"
         placeholder="Search group by name..."
@@ -37,6 +64,7 @@ const GroupsContent = ({
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
+      {/* Group List */}
       {loadingGroups ? (
         <p>Loading groups...</p>
       ) : (
@@ -48,19 +76,33 @@ const GroupsContent = ({
                   <Card.Body>
                     <Card.Title>{group.group_name}</Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
-                      Created by: {group.created_by} ({group.created_role})<br />
+                      Created by: {group.created_by} ({group.created_role})
+                      <br />
                       On: {new Date(group.created_at).toLocaleDateString()}
                     </Card.Subtitle>
                     <Card.Text>{group.description}</Card.Text>
-                    <strong>Members:</strong>
-                    <ul>
-                      {group.members.map((member) => (
-                        <li key={member.id}>
-                          {member.first_name} ({member.email})
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="d-flex gap-2 mt-3">
+
+                    {/* Action Buttons */}
+                    <div className="d-flex gap-2 mt-3 flex-wrap">
+                      {/* Toggle Details */}
+                      <Button
+                        variant="outline-info"
+                        size="sm"
+                        onClick={() =>
+                          setExpandedGroupId(
+                            expandedGroupId === group.group_id
+                              ? null
+                              : group.group_id
+                          )
+                        }
+                      >
+                        <EyeFill className="me-2" />
+                        {expandedGroupId === group.group_id
+                          ? "Hide Details"
+                          : "Details"}
+                      </Button>
+
+                      {/* Edit */}
                       <Button
                         variant="outline-primary"
                         size="sm"
@@ -71,6 +113,8 @@ const GroupsContent = ({
                       >
                         <PencilSquare className="me-2" /> Edit
                       </Button>
+
+                      {/* Delete */}
                       <Button
                         variant="outline-danger"
                         size="sm"
@@ -78,7 +122,32 @@ const GroupsContent = ({
                       >
                         <TrashFill className="me-2" /> Delete
                       </Button>
+
+                      {/* XLSX Download */}
+                      {expandedGroupId === group.group_id && (
+                        <Button
+                          variant="outline-success"
+                          size="sm"
+                          onClick={() => handleDownloadExcel(group)}
+                        >
+                          📥 Download XLSX
+                        </Button>
+                      )}
                     </div>
+
+                    {/* Expanded Member List */}
+                    {expandedGroupId === group.group_id && (
+                      <div className="mt-3">
+                        <strong>Members:</strong>
+                        <ul>
+                          {group.members.map((member) => (
+                            <li key={member.id}>
+                              {member.first_name} ({member.email})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </Card.Body>
                 </Card>
               </Col>

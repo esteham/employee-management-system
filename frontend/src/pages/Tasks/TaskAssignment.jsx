@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Card, Button, Form, Row, Col, Spinner, Alert } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -16,6 +16,9 @@ const TaskAssignment = () => {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const apiURL = import.meta.env.VITE_API_URL;
+
+  // file input er jonno ref
+  const fileInputRef = useRef(null);
 
   // Load all groups on mount
   useEffect(() => {
@@ -89,7 +92,6 @@ const TaskAssignment = () => {
       selectedEmployees.forEach((id) => formData.append("employee_ids[]", id));
       formData.append("task_title", taskTitle);
       formData.append("task_note", taskNote);
-      // formData.append("deadline", deadline);
       formData.append("deadline", deadline ? deadline.toISOString().split("T")[0] : "");
 
       for (let i = 0; i < taskFiles.length; i++) {
@@ -105,7 +107,8 @@ const TaskAssignment = () => {
 
       if (res.data.success) {
         setMessage({ type: "success", text: res.data.message });
-        // reset form
+
+        // Reset all fields
         setSelectedGroup("");
         setEmployees([]);
         setSelectedEmployees([]);
@@ -113,6 +116,11 @@ const TaskAssignment = () => {
         setTaskNote("");
         setDeadline("");
         setTaskFiles([]);
+
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = null;
+        }
       } else {
         setMessage({ type: "error", text: res.data.message || "Failed to assign task" });
       }
@@ -123,11 +131,23 @@ const TaskAssignment = () => {
     }
   };
 
+  // Auto-hide message after 5 seconds
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   return (
     <Card className="p-4">
       <h3>Assign New Task</h3>
       {message && (
-        <Alert variant={message.type === "success" ? "success" : "danger"}>
+        <Alert
+          variant={message.type === "success" ? "success" : "danger"}
+          dismissible
+          onClose={() => setMessage(null)}
+        >
           {message.text}
         </Alert>
       )}
@@ -136,7 +156,7 @@ const TaskAssignment = () => {
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Select Group</Form.Label>
-              <Form.Select 
+              <Form.Select
                 className="custom-select-fix"
                 value={selectedGroup}
                 onChange={(e) => setSelectedGroup(e.target.value)}
@@ -186,14 +206,14 @@ const TaskAssignment = () => {
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label className="d-block">Deadline</Form.Label>
-                <DatePicker
-                  selected={deadline}
-                  onChange={(date) => setDeadline(date)}
-                  dateFormat="yyyy-MM-dd"
-                  className="form-control"
-                  placeholderText="Select a date"
-                  required
-                />
+              <DatePicker
+                selected={deadline}
+                onChange={(date) => setDeadline(date)}
+                dateFormat="yyyy-MM-dd"
+                className="form-control"
+                placeholderText="Select a date"
+                required
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -208,7 +228,12 @@ const TaskAssignment = () => {
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Attach Files</Form.Label>
-          <Form.Control type="file" multiple onChange={handleFileChange} />
+          <Form.Control
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            ref={fileInputRef}
+          />
         </Form.Group>
         <Button type="submit" disabled={loading}>
           {loading ? <Spinner animation="border" size="sm" /> : "Assign Task"}

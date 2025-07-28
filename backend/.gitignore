@@ -11,10 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
-assets/documents
 
 # dotenv environment file
 *.env
+assets/uploads/
 
 # Editor directories and files
 .vscode/*

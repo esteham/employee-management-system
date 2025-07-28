@@ -21,7 +21,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.4rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -61,7 +61,7 @@
 }
 
 .nav-link.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -107,7 +107,7 @@
   .hamburger {
     display: block;
   }
-  
+
   .nav-links {
     position: fixed;
     top: 70px;
@@ -120,19 +120,19 @@
     padding: 2rem 0;
     gap: 2rem;
   }
-  
+
   .menu-toggle:checked ~ .nav-links {
     left: 0;
   }
-  
+
   .menu-toggle:checked + .hamburger span:nth-child(1) {
     transform: rotate(45deg) translate(5px, 5px);
   }
-  
+
   .menu-toggle:checked + .hamburger span:nth-child(2) {
     opacity: 0;
   }
-  
+
   .menu-toggle:checked + .hamburger span:nth-child(3) {
     transform: rotate(-45deg) translate(7px, -6px);
   }

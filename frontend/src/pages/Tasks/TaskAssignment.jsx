@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Card, Button, Form, Row, Col, Spinner, Alert } from "react-bootstrap";
 
 const TaskAssignment = () => {
   const [groups, setGroups] = useState([]);
@@ -12,16 +13,12 @@ const TaskAssignment = () => {
   const [taskFiles, setTaskFiles] = useState([]);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // API base URL (adjust as needed)
   const apiURL = import.meta.env.VITE_API_URL;
 
   // Load all groups on mount
   useEffect(() => {
     axios
-      .get(`${apiURL}backend/api/groups/fetchAllGroups.php`, { 
-        withCredentials: true 
-        })
+      .get(`${apiURL}backend/api/groups/fetchAllGroups.php`, { withCredentials: true })
       .then((res) => {
         if (res.data.success) {
           setGroups(res.data.groups);
@@ -68,7 +65,7 @@ const TaskAssignment = () => {
   };
 
   // Handle file input change
-  const onFileChange = (e) => {
+  const handleFileChange = (e) => {
     setTaskFiles(e.target.files);
   };
 
@@ -124,126 +121,95 @@ const TaskAssignment = () => {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "auto", padding: 20 }}>
-      <h2>Assign New Task</h2>
-
+    <Card className="p-4">
+      <h3>Assign New Task</h3>
       {message && (
-        <div
-          style={{
-            marginBottom: 10,
-            padding: 10,
-            borderRadius: 4,
-            color: message.type === "error" ? "red" : "green",
-            border: `1px solid ${message.type === "error" ? "red" : "green"}`,
-          }}
-        >
+        <Alert variant={message.type === "success" ? "success" : "danger"}>
           {message.text}
-        </div>
+        </Alert>
       )}
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 10 }}>
-          <label>
-            Select Group<span style={{ color: "red" }}> *</span>
-            <br />
-            <select
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              required
-            >
-              <option value="">-- Select Group --</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {employees.length > 0 && (
-          <div style={{ marginBottom: 10 }}>
-            <label>
-              Select Employees<span style={{ color: "red" }}> *</span>
-            </label>
-            <div
-              style={{
-                maxHeight: 150,
-                overflowY: "auto",
-                border: "1px solid #ccc",
-                padding: 5,
-              }}
-            >
-              {employees.map((emp) => (
-                <div key={emp.id}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={selectedEmployees.includes(emp.id)}
-                      onChange={() => toggleEmployee(emp.id)}
-                    />{" "}
-                    {emp.first_name} {emp.last_name}
-                  </label>
+      <Form onSubmit={handleSubmit}>
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Select Group</Form.Label>
+              <Form.Select 
+                className="custom-select-fix"
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                required
+              >
+                <option value="">-- Select Group --</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.group_name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          {employees.length > 0 && (
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Select Employees</Form.Label>
+                <div className="border rounded p-2" style={{ maxHeight: "200px", overflowY: "auto" }}>
+                  {employees.map((emp) => (
+                    <div key={emp.id}>
+                      <Form.Check
+                        type="checkbox"
+                        label={`${emp.first_name} ${emp.last_name}`}
+                        checked={selectedEmployees.includes(emp.id)}
+                        onChange={() => toggleEmployee(emp.id)}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div style={{ marginBottom: 10 }}>
-          <label>
-            Task Title<span style={{ color: "red" }}> *</span>
-            <br />
-            <input
-              type="text"
-              value={taskTitle}
-              onChange={(e) => setTaskTitle(e.target.value)}
-              required
-              style={{ width: "100%" }}
-            />
-          </label>
-        </div>
-
-        <div style={{ marginBottom: 10 }}>
-          <label>
-            Task Note
-            <br />
-            <textarea
-              value={taskNote}
-              onChange={(e) => setTaskNote(e.target.value)}
-              rows={3}
-              style={{ width: "100%" }}
-            />
-          </label>
-        </div>
-
-        <div style={{ marginBottom: 10 }}>
-          <label>
-            Deadline<span style={{ color: "red" }}> *</span>
-            <br />
-            <input
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              required
-              style={{ width: "100%" }}
-            />
-          </label>
-        </div>
-
-        <div style={{ marginBottom: 10 }}>
-          <label>
-            Attach Files
-            <br />
-            <input type="file" multiple onChange={onFileChange} />
-          </label>
-        </div>
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Assigning..." : "Assign Task"}
-        </button>
-      </form>
-    </div>
+              </Form.Group>
+            </Col>
+          )}
+        </Row>
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Task Title</Form.Label>
+              <Form.Control
+                type="text"
+                value={taskTitle}
+                onChange={(e) => setTaskTitle(e.target.value)}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Deadline</Form.Label>
+              <Form.Control
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+        <Form.Group className="mb-3">
+          <Form.Label>Task Note</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={taskNote}
+            onChange={(e) => setTaskNote(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Attach Files</Form.Label>
+          <Form.Control type="file" multiple onChange={handleFileChange} />
+        </Form.Group>
+        <Button type="submit" disabled={loading}>
+          {loading ? <Spinner animation="border" size="sm" /> : "Assign Task"}
+        </Button>
+      </Form>
+    </Card>
   );
 };
 

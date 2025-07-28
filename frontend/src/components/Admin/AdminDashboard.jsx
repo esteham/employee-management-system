@@ -57,8 +57,8 @@ const AdminDashboard = () => {
   const fetchDepartments = () => {
     setLoadingDepartments(true);
     axios
-      .get(`${apiURL}backend/api/department/fetctDepartment.php`, { 
-        withCredentials: true 
+      .get(`${apiURL}backend/api/department/fetctDepartment.php`, {
+        withCredentials: true,
       })
       .then((res) => {
         if (res.data.success) {
@@ -83,15 +83,19 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure to delete this group?")) return;
 
     try {
-      const res = await axios.post(`${apiURL}backend/api/groups/delete.php`, {
-        group_id: id,
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-      });
+      const res = await axios.post(
+        `${apiURL}backend/api/groups/delete.php`,
+        {
+          group_id: id,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
       if (res.data.success) {
-        const updated = groups.filter(group => group.group_id !== id);
+        const updated = groups.filter((group) => group.group_id !== id);
         setGroups(updated);
       } else {
         alert(res.data.message);
@@ -105,15 +109,19 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure to delete this department?")) return;
 
     try {
-      const res = await axios.post(`${apiURL}backend/api/department/delete.php`, {
-        id,
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-      });
+      const res = await axios.post(
+        `${apiURL}backend/api/department/delete.php`,
+        {
+          id,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
       if (res.data.success) {
-        const updated = departments.filter(dept => dept.id !== id);
+        const updated = departments.filter((dept) => dept.id !== id);
         setDepartments(updated);
       } else {
         alert(res.data.message);
@@ -132,7 +140,7 @@ const AdminDashboard = () => {
 
         <Col md={9} lg={10} className="main-content p-4">
           {activeTab === "dashboard" && (
-            <DashboardContent 
+            <DashboardContent
               setShowEmployeeModal={setShowEmployeeModal}
               setShowGroupModal={setShowGroupModal}
             />

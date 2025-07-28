@@ -63,7 +63,7 @@ try {
     $employeeID = $pdo->lastInsertId();
 
     // File Upload (certificate, experience)
-    $uploadDir = '../../assets/documents/';
+    $uploadDir = '../../assets/uploads/documents/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }

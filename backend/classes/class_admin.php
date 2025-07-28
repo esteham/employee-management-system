@@ -71,7 +71,7 @@ class Admin
     /* ===============
     Send mail function
     ================*/
-    public function sendMail($email, $message, $subject)
+    public function sendMail($email, $message, $subject, $attachment = [])
 	{
 		require_once __DIR__ . '/../admin/PHPMailer//PHPMailer.php';
 		require_once __DIR__ . '/../admin/PHPMailer/SMTP.php';
@@ -81,6 +81,7 @@ class Admin
 		$mail->SMTPDebug = 0; // use 2 for debug
 		$mail->Host = 'smtp.gmail.com';
 		$mail->SMTPAuth = true;
+        
 		$mail->Username = 'deepseekspider@gmail.com';
 		$mail->Password = 'rjvaiybizhrajodd'; // App password
 		$mail->SMTPSecure = 'tls';
@@ -88,6 +89,15 @@ class Admin
 
 		$mail->setFrom('deepseekspider@gmail.com', 'Xetlab');
 		$mail->addAddress($email);
+
+        //attachment
+        foreach ($attachment as $files)
+        {
+            if(file_exists($files))
+            {
+                $mail->addAttachment($files);
+            }
+        }
 		$mail->isHTML(true);
 		$mail->CharSet = 'UTF-8';
 		$mail->AltBody = strip_tags($message);

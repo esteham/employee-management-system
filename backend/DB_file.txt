@@ -26,7 +26,7 @@ CREATE TABLE users (
     		status ENUM ('active','inactive') DEFAULT 'active',
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE SET NULL
-			);
+		);
 
 CREATE TABLE attendance (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,7 +40,7 @@ CREATE TABLE attendance (
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     		UNIQUE KEY (employee_id, date),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
-			);
+		);
 
 CREATE TABLE payroll (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,7 +57,7 @@ CREATE TABLE payroll (
     		UNIQUE KEY uk_emp_month_year(employee_id, month, year),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
     		CONSTRAINT chk_month CHECK (month BETWEEN 1 AND 12)
-			);
+		);
 
 CREATE TABLE salary_structure (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,7 +67,7 @@ CREATE TABLE salary_structure (
     		bonus_allowed BOOLEAN DEFAULT 0,
     		effective_from DATE NOT NULL,
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
-			);
+		);
 
 CREATE TABLE login_rules (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -76,7 +76,7 @@ CREATE TABLE login_rules (
     		grace_period_minutes INT DEFAULT 2,
     		fine_per_day DECIMAL(10,2),
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
-			);
+		);
 
 CREATE TABLE late_fines (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,7 +88,7 @@ CREATE TABLE late_fines (
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
     		FOREIGN KEY (attendance_id) REFERENCES attendance(id) ON DELETE CASCADE
-			);
+		);
 
 CREATE TABLE documents (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -97,25 +97,25 @@ CREATE TABLE documents (
 			file_path VARCHAR(255) NOT NULL,
 			FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
 			UNIQUE KEY uk_emp_doctype (employee_id, doc_type)
-			);
+		);
 
 CREATE TABLE holidays (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			title VARCHAR(100),
     		holiday_date DATE UNIQUE NOT NULL,
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-			);
+		);
 
 CREATE TABLE weekends (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			day_of_week ENUM('Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday') UNIQUE
-			);
+		);
 
 CREATE TABLE departments (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			name VARCHAR(100) NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-			);
+		);
 
 CREATE TABLE groups (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -124,7 +124,7 @@ CREATE TABLE groups (
 		    created_by INT,
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     		FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
-			);
+		);
 
 CREATE TABLE group_members (
 			id INT AUTO_INCREMENT PRIMARY KEY,
@@ -133,4 +133,33 @@ CREATE TABLE group_members (
     		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     		FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
     		FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
-			);
+		);
+
+CREATE TABLE tasks (
+    		id INT AUTO_INCREMENT PRIMARY KEY,
+    		group_id INT NOT NULL,
+			title VARCHAR(255) NOT NULL,
+    		note TEXT,
+    		deadline DATE,
+    		assigned_by INT DEFAULT NULL,
+    		assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    		FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    		FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
+		);
+
+CREATE TABLE task_files (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            task_id INT NOT NULL,
+            file_path VARCHAR(255) NOT NULL,
+            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+		);
+
+CREATE TABLE task_assignments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            task_id INT NOT NULL,
+            employee_id INT NOT NULL,
+            assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+            FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+		);

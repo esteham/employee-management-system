@@ -8,12 +8,13 @@ import GroupsContent from "./GroupsContent";
 import PayrollContent from "./PayrollContent";
 import SettingsContent from "./SettingsContent";
 import DepartmentsContent from "./DepartmentsContent";
+import TaskContext from "./TaskContext";
 import EmployeeRegistrationModal from "../../pages/Employee/EmployeeRegistrationModal";
 import GroupCreateModal from "../../pages/Groups/GroupCreateModal";
 import GroupEditModal from "../../pages/Groups/GroupEditModal";
 import DepartmentCreateModal from "../../pages/Departments/DepartmentCreateModal";
 import DepartmentEditModal from "../../pages/Departments/DepartmentEditModal";
-import TaskAssignment from "../../pages/Tasks/TaskAssignment";
+// import TaskAssignment from "../../pages/Tasks/TaskAssignment";
 import "../../assets/css/AdminDashboard.css";
 
 import ErrorBoundary from "../ErrorBoundary";
@@ -174,7 +175,7 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === "payroll" && <PayrollContent />}
-          {activeTab === "tasks" && <TaskAssignment />}
+          {activeTab === "tasks" && <TaskContext />}
           {activeTab === "settings" && <SettingsContent />}
 
           <EmployeeRegistrationModal

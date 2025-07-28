@@ -27,6 +27,11 @@
   transform: scale(1.1);
 }
 
+.nav
+{
+  align-items: self-start!important;
+}
+
 .nav-pills .nav-link {
   color: rgba(255, 255, 255, 0.8);
   border-radius: 0;

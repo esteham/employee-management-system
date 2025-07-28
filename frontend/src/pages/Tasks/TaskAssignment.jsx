@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, Button, Form, Row, Col, Spinner, Alert } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const TaskAssignment = () => {
   const [groups, setGroups] = useState([]);
@@ -182,13 +184,15 @@ const TaskAssignment = () => {
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3">
-              <Form.Label>Deadline</Form.Label>
-              <Form.Control
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                required
-              />
+              <Form.Label className="d-block">Deadline</Form.Label>
+                <DatePicker
+                  selected={deadline}
+                  onChange={(date) => setDeadline(date)}
+                  dateFormat="yyyy-MM-dd"
+                  className="form-control"
+                  placeholderText="Select a date"
+                  required
+                />
             </Form.Group>
           </Col>
         </Row>

@@ -38,7 +38,6 @@ const TaskList = () => {
         <thead>
           <tr>
             <th>Title</th>
-            <th>Note</th>
             <th>Deadline</th>
             <th>Assigned At</th>
             <th>Group</th>
@@ -52,7 +51,6 @@ const TaskList = () => {
             tasks.map((task) => (
               <tr key={task.task_id}>
                 <td>{task.title}</td>
-                <td>{task.note}</td>
                 <td>{task.deadline}</td>
                 <td>{task.assigned_at}</td>
                 <td><Badge bg="info">{task.group_name}</Badge></td>
@@ -66,8 +64,10 @@ const TaskList = () => {
                           href={`${apiURL}backend/assets/uploads/tasks/${file}`}
                           target="_blank"
                           rel="noreferrer"
+                          download
+                          className="btn btn-sm btn-primary"
                         >
-                          📄 {file}
+                          Download
                         </a>
                       </div>
                     ))

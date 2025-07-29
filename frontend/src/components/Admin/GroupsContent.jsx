@@ -152,13 +152,26 @@ const GroupsContent = ({
                     {expandedGroupId === group.group_id && (
                       <div className="mt-3">
                         <strong>Members:</strong>
-                        <ul>
-                          {group.members.map((member) => (
-                            <li key={member.id}>
-                              {member.first_name} ({member.email})
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="table-responsive">
+                          <table className="table table-bordered table-sm">
+                            <thead className="table-light">
+                              <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {group.members.map((member, index) => (
+                                <tr key={member.id}>
+                                  <td>{index + 1}</td>
+                                  <td>{member.first_name} {member.last_name}</td>
+                                  <td>{member.email}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     )}
                   </Card.Body>

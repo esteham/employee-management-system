@@ -170,6 +170,7 @@ CREATE TABLE task_progress(
             task_id INT NOT NULL,
             employee_id INT NOT NULL,
             progress INT DEFAULT 0,
+			note TEXT DEFAULT NULL,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
             FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE

@@ -28,6 +28,8 @@ $input = json_decode(file_get_contents("php://input"), true);
 $employeeID = $_SESSION['user']['employee_id'];
 $task_id    = $input['task_id'] ?? null;
 $progress   = $input['progress_percent'] ?? null;
+$note       = isset($input['note']) ? trim($input['note']) : null;
+
 
 if(!$task_id || $progress === null || $progress < 0 || $progress > 100)
 {
@@ -45,14 +47,23 @@ try
 
     if($check->rowCount() > 0)
     {
-        $update = $pdo->prepare("UPDATE task_progress SET progress = ?, updated_at = NOW() WHERE task_id = ? AND employee_id = ?");
-        $update->execute([$progress, $task_id, $employeeID]);
+        $update = $pdo->prepare("UPDATE 
+                            task_progress SET progress = ?, 
+                            note = ?, 
+                            updated_at = NOW() 
+                            WHERE task_id = ? 
+                            AND employee_id = ?
+                        ");
+        $update->execute([$progress, $note, $task_id, $employeeID]);
     }
 
     else
     {
-        $insert = $pdo->prepare("INSERT INTO task_progress (task_id, employee_id, progress, updated_at) VALUES (?, ?, ?, NOW())");
-        $insert->execute([$task_id, $employeeID, $progress]);
+        $insert = $pdo->prepare("INSERT INTO 
+                            task_progress (task_id, employee_id, progress, note, updated_at) 
+                            VALUES (?, ?, ?, ?, NOW())
+                        ");
+        $insert->execute([$task_id, $employeeID, $progress, $note]);
     }
 
     $stmt = $pdo->prepare("SELECT t.title, u.email 
@@ -128,10 +139,11 @@ try
                 <div class="content">
                     <p>Hello Admin,</p>
                     
-                    <p><strong>$employeeName</strong> has updated the progress of:</p>
+                    <p><strong>$employeeName</strong>  has updated the progress of :</p>
                     
-                    <p><strong>Task:</strong> {$taskName}<strong>&nbsp; ID:</strong>{$task_id} <br><br>
-                    <strong>New Progress:</strong> <span class="highlight">{$progress}%</span></p>
+                    <p><strong>Task:</strong> {$taskName}<strong>&nbsp; ID :</strong> {$task_id} <br><br>
+                    <strong>New Progress :</strong> <span class="highlight"> {$progress}%</span></p>
+                    <p><strong>Note :</strong> {$note}</p>
                 </div>
                 
                 <div class="footer">

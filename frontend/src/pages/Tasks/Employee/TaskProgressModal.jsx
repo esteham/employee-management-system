@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Button,
@@ -9,13 +9,40 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 
-
 const TaskProgressModal = ({ show, handleClose }) => {
   const [taskId, setTaskId] = useState("");
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [loading, setLoading] = useState(false);
+  const [taskList, setTaskList] = useState([]);
+  const [fetchingTasks, setFetchingTasks] = useState(false);
+  const [note, setNote] = useState("");
   const BASE_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    if (show) {
+      fetchEmployeeTasks();
+    }
+  }, [show]);
+
+  const fetchEmployeeTasks = async () => {
+    setFetchingTasks(true);
+    try {
+      const response = await axios.get(
+        `${BASE_URL}backend/api/tasks/employee/show_task.php`,
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        setTaskList(response.data.data);
+      } else {
+        setMessage({ type: "danger", text: "Failed to load tasks" });
+      }
+    } catch (error) {
+      setMessage({ type: "danger", text: "Error fetching tasks" + error.message });
+    } finally {
+      setFetchingTasks(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +55,7 @@ const TaskProgressModal = ({ show, handleClose }) => {
         {
           task_id: taskId,
           progress_percent: progress,
+          note: note.trim() === "" ? null : note,
         },
         {
           withCredentials: true,
@@ -37,7 +65,7 @@ const TaskProgressModal = ({ show, handleClose }) => {
       if (response.data.success) {
         setMessage({ type: "success", text: response.data.message });
         setTimeout(() => {
-          handleClose(); 
+          handleClose();
         }, 1000);
       } else {
         setMessage({ type: "danger", text: response.data.message });
@@ -64,19 +92,26 @@ const TaskProgressModal = ({ show, handleClose }) => {
 
       <Form onSubmit={handleSubmit}>
         <Modal.Body>
-          {message.text && (
-            <Alert variant={message.type}>{message.text}</Alert>
-          )}
+          {message.text && <Alert variant={message.type}>{message.text}</Alert>}
 
           <Form.Group className="mb-3" controlId="taskId">
-            <Form.Label>Task ID</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter task ID"
-              value={taskId}
-              onChange={(e) => setTaskId(e.target.value)}
-              required
-            />
+            <Form.Label>Select Task</Form.Label>
+            {fetchingTasks ? (
+              <Spinner animation="border" size="sm" />
+            ) : (
+              <Form.Select
+                value={taskId}
+                onChange={(e) => setTaskId(e.target.value)}
+                required
+              >
+                <option value="">-- Select a task --</option>
+                {taskList.map((task) => (
+                  <option key={task.task_id} value={task.task_id}>
+                    {task.title} (#{task.task_id})
+                  </option>
+                ))}
+              </Form.Select>
+            )}
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="progress">
@@ -90,6 +125,17 @@ const TaskProgressModal = ({ show, handleClose }) => {
             <ProgressBar now={progress} label={`${progress}%`} />
           </Form.Group>
         </Modal.Body>
+        <Form.Group className="mb-3" controlId="note">
+          <Form.Label>Note (optional)</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            placeholder="Write a note about the progress..."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </Form.Group>
+
 
         <Modal.Footer>
           <Button variant="secondary" onClick={handleModalClose}>

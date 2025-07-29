@@ -11,9 +11,9 @@ const EmployeeTasks = () => {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const BASE_URL = import.meta.env.VITE_API_URL;
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTaskDetails, setSelectedTaskDetails] = useState(null);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
 
   useEffect(() => {

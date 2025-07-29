@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState } from "react";
+import { Button } from "react-bootstrap";
+import TaskProgressModal from "../../pages/Tasks/Employee/TaskProgressModal";
 
 const EmployeeDashboard = () => {
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <div className="container mt-5">
-      <h2>👨‍💼 Employee Dashboard</h2>
-      <p>Welcome, Employee! Here's your dashboard.</p>
+      <Button variant="primary" onClick={() => setShowModal(true)}>
+        Update Task Progress
+      </Button>
 
-      {/* Employee-specific actions */}
-      <ul>
-        <li>View Payslip</li>
-        <li>Submit Leave Application</li>
-        <li>Update Profile</li>
-      </ul>
+      <TaskProgressModal
+        show={showModal}
+        handleClose={() => setShowModal(false)}
+      />
     </div>
   );
 };

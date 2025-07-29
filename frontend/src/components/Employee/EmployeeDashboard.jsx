@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import TaskProgressModal from "../../pages/Tasks/Employee/TaskProgressModal";
+import EmployeeTasks from "../../pages/Tasks/Employee/EmployeeTasks";
 
 const EmployeeDashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -15,6 +16,7 @@ const EmployeeDashboard = () => {
         show={showModal}
         handleClose={() => setShowModal(false)}
       />
+      <EmployeeTasks />
     </div>
   );
 };

@@ -9,6 +9,7 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 
+
 const TaskProgressModal = ({ show, handleClose }) => {
   const [taskId, setTaskId] = useState("");
   const [progress, setProgress] = useState(0);

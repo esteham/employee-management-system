@@ -23,9 +23,11 @@ if($_SERVER['REQUEST_METHOD'] !== 'POST')
 	exit;
 }
 
+$input = json_decode(file_get_contents("php://input"), true);
+
 $employeeID = $_SESSION['user']['employee_id'];
-$task_id    = $_POST['task_id'] ?? null;
-$progress   = $_POST['progress_percent'] ?? null;
+$task_id    = $input['task_id'] ?? null;
+$progress   = $input['progress_percent'] ?? null;
 
 if(!$task_id || $progress === null || $progress < 0 || $progress > 100)
 {

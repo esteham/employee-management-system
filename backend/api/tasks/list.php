@@ -49,6 +49,6 @@ catch (Exception $e)
 {
 	echo json_encode([
             'success' => false, 
-            'message' =>'Failed to get tasks', 'error' =>$e->getMessage()
+            'message' =>'Failed to get tasks', 'error'=>$e->getMessage()
         ]);
 }

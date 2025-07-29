@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Modal,
@@ -7,16 +7,81 @@ import {
   Alert,
   FloatingLabel,
   Badge,
+  ListGroup,
 } from "react-bootstrap";
 import { XCircle, PlusCircle, CheckCircle, X } from "react-bootstrap-icons";
 
 const GroupCreateModal = ({ show, handleClose, refreshGroups }) => {
   const [groupName, setGroupName] = useState("");
   const [description, setDescription] = useState("");
-  const [employeeIds, setEmployeeIds] = useState([""]);
+  const [employeeFields, setEmployeeFields] = useState([
+    { value: "", selectedId: null, suggestions: [] },
+  ]);
   const [response, setResponse] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allEmployees, setAllEmployees] = useState([]);
   const BASE_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    if (show) {
+      axios
+        .get(`${BASE_URL}backend/api/employees/view.php`, {
+          withCredentials: true,
+        })
+        .then((res) => {
+          if (res.data.success) {
+            setAllEmployees(res.data.employees);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch employees:", err);
+        });
+    }
+  }, [show]);
+
+  const handleEmployeeChange = (index, input) => {
+    const updated = [...employeeFields];
+    updated[index].value = input;
+    updated[index].selectedId = null; // reset selected ID when manually typed
+    updated[index].suggestions = allEmployees.filter((emp) => {
+      const fullName = `${emp.first_name} ${emp.last_name}`.toLowerCase();
+      return (
+        emp.id.toString().includes(input.toLowerCase()) ||
+        fullName.includes(input.toLowerCase())
+      );
+    });
+    setEmployeeFields(updated);
+  };
+
+  const selectSuggestion = (index, emp) => {
+    const updated = [...employeeFields];
+    updated[index].value = `${emp.id} - ${emp.first_name} ${emp.last_name}`;
+    updated[index].selectedId = emp.id;
+    updated[index].suggestions = [];
+    setEmployeeFields(updated);
+  };
+
+  const addEmployeeField = () => {
+    setEmployeeFields([
+      ...employeeFields,
+      { value: "", selectedId: null, suggestions: [] },
+    ]);
+  };
+
+  const removeEmployeeField = (index) => {
+    if (employeeFields.length > 1) {
+      const updated = [...employeeFields];
+      updated.splice(index, 1);
+      setEmployeeFields(updated);
+    }
+  };
+
+  const resetForm = () => {
+    setGroupName("");
+    setDescription("");
+    setEmployeeFields([{ value: "", selectedId: null, suggestions: [] }]);
+    setResponse(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +90,9 @@ const GroupCreateModal = ({ show, handleClose, refreshGroups }) => {
     const payload = {
       group_name: groupName.trim(),
       description: description.trim(),
-      employee_ids: employeeIds.filter((id) => id.trim() !== ""),
+      employee_ids: employeeFields
+        .map((e) => e.selectedId)
+        .filter((id) => !!id),
     };
 
     try {
@@ -42,11 +109,8 @@ const GroupCreateModal = ({ show, handleClose, refreshGroups }) => {
 
       setResponse(res.data);
       if (res.data.success) {
-        // Reset form on success
         resetForm();
-        // Refresh parent component if needed
         if (refreshGroups) refreshGroups();
-        // Auto-close after 2 seconds if successful
         setTimeout(() => handleClose(), 2000);
       }
     } catch (error) {
@@ -58,31 +122,6 @@ const GroupCreateModal = ({ show, handleClose, refreshGroups }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleEmployeeChange = (index, value) => {
-    const updated = [...employeeIds];
-    updated[index] = value;
-    setEmployeeIds(updated);
-  };
-
-  const addEmployeeField = () => {
-    setEmployeeIds([...employeeIds, ""]);
-  };
-
-  const removeEmployeeField = (index) => {
-    if (employeeIds.length > 1) {
-      const updated = [...employeeIds];
-      updated.splice(index, 1);
-      setEmployeeIds(updated);
-    }
-  };
-
-  const resetForm = () => {
-    setGroupName("");
-    setDescription("");
-    setEmployeeIds([""]);
-    setResponse(null);
   };
 
   const handleModalClose = () => {
@@ -131,28 +170,51 @@ const GroupCreateModal = ({ show, handleClose, refreshGroups }) => {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <Form.Label className="fw-semibold">Employee IDs</Form.Label>
               <Badge bg="light" text="dark" className="rounded-pill">
-                {employeeIds.filter((id) => id.trim() !== "").length} added
+                {employeeFields.filter((e) => e.selectedId !== null).length}{" "}
+                added
               </Badge>
             </div>
 
-            {employeeIds.map((id, index) => (
-              <div key={index} className="d-flex align-items-center mb-2">
-                <Form.Control
-                  type="text"
-                  placeholder={`Employee ID #${index + 1}`}
-                  value={id}
-                  onChange={(e) => handleEmployeeChange(index, e.target.value)}
-                  className="flex-grow-1"
-                />
-                <Button
-                  variant="outline-danger"
-                  onClick={() => removeEmployeeField(index)}
-                  className="ms-2"
-                  disabled={employeeIds.length <= 1}
-                  title="Remove employee"
-                >
-                  <XCircle />
-                </Button>
+            {employeeFields.map((field, index) => (
+              <div key={index} className="mb-3 position-relative">
+                <div className="d-flex align-items-center">
+                  <Form.Control
+                    type="text"
+                    placeholder={`Employee ID or name #${index + 1}`}
+                    value={field.value}
+                    onChange={(e) =>
+                      handleEmployeeChange(index, e.target.value)
+                    }
+                    autoComplete="off"
+                    className="flex-grow-1"
+                  />
+                  <Button
+                    variant="outline-danger"
+                    onClick={() => removeEmployeeField(index)}
+                    className="ms-2"
+                    disabled={employeeFields.length <= 1}
+                  >
+                    <XCircle />
+                  </Button>
+                </div>
+
+                {/* Suggestion dropdown */}
+                {field.suggestions.length > 0 && (
+                  <ListGroup
+                    className="position-absolute w-100 shadow zindex-tooltip"
+                    style={{ zIndex: 999 }}
+                  >
+                    {field.suggestions.slice(0, 5).map((emp) => (
+                      <ListGroup.Item
+                        key={emp.id}
+                        action
+                        onClick={() => selectSuggestion(index, emp)}
+                      >
+                        {emp.id} - {emp.first_name} {emp.last_name}
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
               </div>
             ))}
 

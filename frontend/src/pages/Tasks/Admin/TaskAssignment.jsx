@@ -109,7 +109,7 @@ const TaskAssignment = () => {
       }
 
       const res = await axios.post(
-        `${BASE_URL}backend/api/tasks/assign.php`,
+        `${BASE_URL}backend/api/tasks/admin/assign.php`,
         formData,
         {
           withCredentials: true,

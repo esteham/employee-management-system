@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import TaskList from "../../pages/Tasks/TaskList";
-import TaskAssignment from "../../pages/Tasks/TaskAssignment";
+import TaskList from "../../pages/Tasks/Admin/TaskList";
+import TaskAssignment from "../../pages/Tasks/Admin/TaskAssignment";
 
 const TaskContext = () => {
   const [showOnlyTaskList, setShowOnlyTaskList] = useState(false);

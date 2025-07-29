@@ -10,7 +10,7 @@ const TaskList = () => {
 
   useEffect(() => {
     axios
-      .get(`${BASE_URL}backend/api/tasks/list.php`, {
+      .get(`${BASE_URL}backend/api/tasks/admin/list.php`, {
         withCredentials: true,
       })
       .then((res) => {

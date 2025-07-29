@@ -26,10 +26,10 @@ const GroupsContent = ({
   // Excel Download Function
   const handleDownloadExcel = (group) => {
     const rows = [
-      ["Employee List"], 
-      [`Group: ${group.group_name}`], 
-      [], 
-      ["ID", "Name", "Email"], 
+      ["Employee List"],
+      [`Group: ${group.group_name}`],
+      [],
+      ["ID", "Name", "Email"],
       ...group.members.map((member) => [
         member.id,
         member.first_name,
@@ -82,10 +82,18 @@ const GroupsContent = ({
                   <Card.Body>
                     <Card.Title>{group.group_name}</Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
-                      Created by: {group.created_by} ({group.created_role})<br />
+                      Created by: {group.created_by} ({group.created_role})
+                      <br />
                       On: {new Date(group.created_at).toLocaleDateString()}
                     </Card.Subtitle>
-                    <Card.Text>{group.description}</Card.Text>
+                    <Card.Text>
+                      {expandedGroupId === group.group_id
+                        ? group.description
+                        : group.description.split(" ").slice(0, 10).join(" ") +
+                          (group.description.split(" ").length > 10
+                            ? "..."
+                            : "")}
+                    </Card.Text>
 
                     {/* Action Buttons */}
                     <div className="d-flex gap-2 mt-3 flex-wrap">
@@ -95,12 +103,16 @@ const GroupsContent = ({
                         size="sm"
                         onClick={() =>
                           setExpandedGroupId(
-                            expandedGroupId === group.group_id ? null : group.group_id
+                            expandedGroupId === group.group_id
+                              ? null
+                              : group.group_id
                           )
                         }
                       >
                         <EyeFill className="me-2" />
-                        {expandedGroupId === group.group_id ? "Hide Details" : "Details"}
+                        {expandedGroupId === group.group_id
+                          ? "Hide Details"
+                          : "Details"}
                       </Button>
 
                       {/* Edit */}

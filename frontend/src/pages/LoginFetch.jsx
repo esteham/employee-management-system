@@ -11,7 +11,7 @@ const LoginFetch = () => {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   // Validation schema
   const validationSchema = Yup.object().shape({
@@ -30,7 +30,7 @@ const LoginFetch = () => {
       setError("");
 
       try {
-        const response = await fetch(`${apiURL}backend/api/auth/login.php`, {
+        const response = await fetch(`${BASE_URL}backend/api/auth/login.php`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -69,7 +69,10 @@ const LoginFetch = () => {
 
   return (
     <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-      <Card className="shadow-sm border-0" style={{ width: "100%", maxWidth: "400px" }}>
+      <Card
+        className="shadow-sm border-0"
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
         <Card.Body className="p-4">
           <div className="text-center mb-4">
             <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
@@ -88,7 +91,9 @@ const LoginFetch = () => {
 
           <Form onSubmit={formik.handleSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label className="text-muted small fw-bold">USERNAME</Form.Label>
+              <Form.Label className="text-muted small fw-bold">
+                USERNAME
+              </Form.Label>
               <div className="input-group">
                 <span className="input-group-text bg-light border-end-0">
                   <FiUser className="text-muted" />
@@ -105,7 +110,10 @@ const LoginFetch = () => {
                 />
               </div>
               {formik.touched.username && formik.errors.username && (
-                <Form.Control.Feedback type="invalid" className="d-flex align-items-center">
+                <Form.Control.Feedback
+                  type="invalid"
+                  className="d-flex align-items-center"
+                >
                   <FiAlertCircle className="me-1" size={14} />
                   {formik.errors.username}
                 </Form.Control.Feedback>
@@ -113,7 +121,9 @@ const LoginFetch = () => {
             </Form.Group>
 
             <Form.Group className="mb-4">
-              <Form.Label className="text-muted small fw-bold">PASSWORD</Form.Label>
+              <Form.Label className="text-muted small fw-bold">
+                PASSWORD
+              </Form.Label>
               <div className="input-group">
                 <span className="input-group-text bg-light border-end-0">
                   <FiLock className="text-muted" />
@@ -130,7 +140,10 @@ const LoginFetch = () => {
                 />
               </div>
               {formik.touched.password && formik.errors.password && (
-                <Form.Control.Feedback type="invalid" className="d-flex align-items-center">
+                <Form.Control.Feedback
+                  type="invalid"
+                  className="d-flex align-items-center"
+                >
                   <FiAlertCircle className="me-1" size={14} />
                   {formik.errors.password}
                 </Form.Control.Feedback>
@@ -145,7 +158,12 @@ const LoginFetch = () => {
             >
               {isLoading ? (
                 <>
-                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    className="me-2"
+                  />
                   Signing in...
                 </>
               ) : (

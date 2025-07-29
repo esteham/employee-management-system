@@ -1,28 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, ProgressBar, Alert, Spinner } from 'react-bootstrap';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { FiUpload, FiUser, FiMail, FiPhone, FiHome, FiUsers } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import {
+  Modal,
+  Button,
+  Form,
+  ProgressBar,
+  Alert,
+  Spinner,
+} from "react-bootstrap";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import {
+  FiUpload,
+  FiUser,
+  FiMail,
+  FiPhone,
+  FiHome,
+  FiUsers,
+} from "react-icons/fi";
 
 const EmployeeRegistrationModal = ({ show, handleClose }) => {
   const [step, setStep] = useState(1);
   const [departments, setDepartments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   // Form validation schemas for each step
   const stepSchemas = [
     Yup.object().shape({
-      first_name: Yup.string().required('First name is required'),
-      last_name: Yup.string().required('Last name is required'),
-      username: Yup.string().required('Username is required'),
-      department_id: Yup.string().required('Department is required'),
+      first_name: Yup.string().required("First name is required"),
+      last_name: Yup.string().required("Last name is required"),
+      username: Yup.string().required("Username is required"),
+      department_id: Yup.string().required("Department is required"),
     }),
     Yup.object().shape({
-      phone: Yup.string().required('Phone is required'),
-      email: Yup.string().email('Invalid email').required('Email is required'),
-      address: Yup.string().required('Address is required'),
+      phone: Yup.string().required("Phone is required"),
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      address: Yup.string().required("Address is required"),
     }),
     Yup.object().shape({
       emergency_name: Yup.string(),
@@ -37,18 +51,18 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
 
   const formik = useFormik({
     initialValues: {
-      first_name: '',
-      last_name: '',
-      email: '',
-      phone: '',    
-      username: '',          
-      department_id: '',
-      address: '',
-      emergency_name: '',
-      emergency_phone: '',
-      emergency_relation: '',
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      username: "",
+      department_id: "",
+      address: "",
+      emergency_name: "",
+      emergency_phone: "",
+      emergency_relation: "",
       certificate: null,
-      experience: null
+      experience: null,
     },
     validationSchema: stepSchemas[step - 1],
     onSubmit: async (values) => {
@@ -56,55 +70,61 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
         setStep(step + 1);
         return;
       }
-      
+
       setIsSubmitting(true);
       setSubmitError(null);
-      
+
       try {
         const data = new FormData();
         for (let key in values) {
           data.append(key, values[key]);
         }
 
-        const res = await fetch(`${apiURL}backend/api/employees/reg_employee.php`, {
-          method: 'POST',
-          credentials: 'include',
-          body: data
-        });
+        const res = await fetch(
+          `${BASE_URL}backend/api/employees/reg_employee.php`,
+          {
+            method: "POST",
+            credentials: "include",
+            body: data,
+          }
+        );
 
         const result = await res.json();
-        
+
         if (result.success) {
           handleClose();
           formik.resetForm();
           setStep(1);
         } else {
-          setSubmitError(result.message || 'Registration failed');
+          setSubmitError(result.message || "Registration failed");
         }
       } catch (err) {
         console.error(err);
-        setSubmitError('Something went wrong');
+        setSubmitError("Something went wrong");
       } finally {
         setIsSubmitting(false);
       }
-    }
+    },
   });
 
   useEffect(() => {
     if (show) {
       const fetchDepartments = async () => {
         try {
-          const res = await fetch(`${apiURL}backend/api/department/fetctDepartment.php`, {
-            credentials: 'include'
-          });
+          const res = await fetch(
+            `${BASE_URL}backend/api/department/fetctDepartment.php`,
+            {
+              credentials: "include",
+            }
+          );
           const result = await res.json();
           if (result.success) {
             setDepartments(result.departments);
           } else {
-            throw new Error(result.message || 'Failed to fetch departments');
+            throw new Error(result.message || "Failed to fetch departments");
           }
         } catch (err) {
-          console.error('Department load failed:', err.message);
+          console.error("Department load failed:", err.message);
         }
       };
       fetchDepartments();
@@ -122,22 +142,44 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
   };
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" backdrop="static" centered>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      size="lg"
+      backdrop="static"
+      centered
+    >
       <Modal.Header closeButton className="border-0 pb-0">
         <Modal.Title className="fw-bold">Register New Employee</Modal.Title>
       </Modal.Header>
       <Modal.Body className="pt-1">
         <div className="mb-4">
-          <ProgressBar now={(step / 4) * 100} className="mb-2" style={{ height: '6px' }} />
+          <ProgressBar
+            now={(step / 4) * 100}
+            className="mb-2"
+            style={{ height: "6px" }}
+          />
           <div className="d-flex justify-content-between text-muted small">
-            <span className={step >= 1 ? 'fw-bold text-primary' : ''}>Personal Info</span>
-            <span className={step >= 2 ? 'fw-bold text-primary' : ''}>Contact</span>
-            <span className={step >= 3 ? 'fw-bold text-primary' : ''}>Emergency</span>
-            <span className={step >= 4 ? 'fw-bold text-primary' : ''}>Documents</span>
+            <span className={step >= 1 ? "fw-bold text-primary" : ""}>
+              Personal Info
+            </span>
+            <span className={step >= 2 ? "fw-bold text-primary" : ""}>
+              Contact
+            </span>
+            <span className={step >= 3 ? "fw-bold text-primary" : ""}>
+              Emergency
+            </span>
+            <span className={step >= 4 ? "fw-bold text-primary" : ""}>
+              Documents
+            </span>
           </div>
         </div>
 
-        {submitError && <Alert variant="danger" className="mb-4">{submitError}</Alert>}
+        {submitError && (
+          <Alert variant="danger" className="mb-4">
+            {submitError}
+          </Alert>
+        )}
 
         <Form onSubmit={formik.handleSubmit}>
           {step === 1 && (
@@ -154,7 +196,9 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
                     value={formik.values.first_name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.first_name && formik.errors.first_name}
+                    isInvalid={
+                      formik.touched.first_name && formik.errors.first_name
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.first_name}
@@ -173,7 +217,9 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
                     value={formik.values.last_name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.last_name && formik.errors.last_name}
+                    isInvalid={
+                      formik.touched.last_name && formik.errors.last_name
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.last_name}
@@ -192,7 +238,9 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
                     value={formik.values.username}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.username && formik.errors.username}
+                    isInvalid={
+                      formik.touched.username && formik.errors.username
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.username}
@@ -209,7 +257,10 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
                     value={formik.values.department_id}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.department_id && formik.errors.department_id}
+                    isInvalid={
+                      formik.touched.department_id &&
+                      formik.errors.department_id
+                    }
                   >
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
@@ -377,16 +428,18 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
               onClick={step === 1 ? handleClose : handleBack}
               disabled={isSubmitting}
             >
-              {step === 1 ? 'Cancel' : 'Back'}
+              {step === 1 ? "Cancel" : "Back"}
             </Button>
-            
+
             <Button
-              variant={step === 4 ? 'primary' : 'outline-primary'}
+              variant={step === 4 ? "primary" : "outline-primary"}
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting && <Spinner animation="border" size="sm" className="me-2" />}
-              {step === 4 ? 'Complete Registration' : 'Next'}
+              {isSubmitting && (
+                <Spinner animation="border" size="sm" className="me-2" />
+              )}
+              {step === 4 ? "Complete Registration" : "Next"}
             </Button>
           </div>
         </Form>

@@ -36,12 +36,12 @@ const AdminDashboard = () => {
   const [deptEditModal, setDeptEditModal] = useState(false);
   const [selectedDept, setSelectedDept] = useState(null);
 
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   const fetchGroups = () => {
     setLoadingGroups(true);
     axios
-      .get(`${apiURL}backend/api/groups/view.php`, { withCredentials: true })
+      .get(`${BASE_URL}backend/api/groups/view.php`, { withCredentials: true })
       .then((res) => {
         if (res.data.success) {
           setGroups(res.data.groups);
@@ -59,7 +59,7 @@ const AdminDashboard = () => {
   const fetchDepartments = () => {
     setLoadingDepartments(true);
     axios
-      .get(`${apiURL}backend/api/department/fetctDepartment.php`, {
+      .get(`${BASE_URL}backend/api/department/fetctDepartment.php`, {
         withCredentials: true,
       })
       .then((res) => {
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.post(
-        `${apiURL}backend/api/groups/delete.php`,
+        `${BASE_URL}backend/api/groups/delete.php`,
         {
           group_id: id,
         },
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
 
     try {
       const res = await axios.post(
-        `${apiURL}backend/api/department/delete.php`,
+        `${BASE_URL}backend/api/department/delete.php`,
         {
           id,
         },

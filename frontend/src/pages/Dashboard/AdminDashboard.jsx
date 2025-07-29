@@ -38,12 +38,12 @@
 //   const [loadingGroups, setLoadingGroups] = useState(true);
 //   const [searchTerm, setSearchTerm] = useState("");
 
-//   const apiURL = import.meta.env.VITE_API_URL;
+//   const BASE_URL = import.meta.env.VITE_API_URL;
 
 //   const fetchGroups = () => {
 //     setLoadingGroups(true);
 //     axios
-//       .get(`${apiURL}backend/api/groups/view.php`, {
+//       .get(`${BASE_URL}backend/api/groups/view.php`, {
 //         withCredentials: true,
 //       })
 //       .then((res) => {
@@ -68,7 +68,7 @@
 //     if (!window.confirm("Are you sure to delete this group?")) return;
 
 //     try {
-//       const res = await axios.post(`${apiURL}backend/api/groups/delete.php`, {
+//       const res = await axios.post(`${BASE_URL}backend/api/groups/delete.php`, {
 //         id: id,
 //       }, {
 //         headers: { 'Content-Type': 'application/json' },

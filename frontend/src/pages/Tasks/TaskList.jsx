@@ -6,13 +6,13 @@ const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     axios
-      .get(`${apiURL}backend/api/tasks/list.php`,{
-        withCredentials: true 
-        })
+      .get(`${BASE_URL}backend/api/tasks/list.php`, {
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data.success) {
           setTasks(res.data.data);
@@ -53,7 +53,9 @@ const TaskList = () => {
                 <td>{task.title}</td>
                 <td>{task.deadline}</td>
                 <td>{task.assigned_at}</td>
-                <td><Badge bg="info">{task.group_name}</Badge></td>
+                <td>
+                  <Badge bg="info">{task.group_name}</Badge>
+                </td>
                 <td>{task.employee_name}</td>
                 <td>{task.employee_email}</td>
                 <td>
@@ -61,7 +63,7 @@ const TaskList = () => {
                     task.files.map((file, index) => (
                       <div key={index}>
                         <a
-                          href={`${apiURL}backend/assets/uploads/tasks/${file}`}
+                          href={`${BASE_URL}backend/assets/uploads/tasks/${file}`}
                           target="_blank"
                           rel="noreferrer"
                           download

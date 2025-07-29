@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Form, InputGroup, Table, Modal, Spinner, Pagination } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Form,
+  InputGroup,
+  Table,
+  Modal,
+  Spinner,
+  Pagination,
+} from "react-bootstrap";
 import { PersonPlusFill } from "react-bootstrap-icons";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -18,7 +27,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchEmployees();
@@ -28,7 +37,9 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
   const fetchEmployees = () => {
     setLoading(true);
     axios
-      .get(`${apiURL}backend/api/employees/view.php`, { withCredentials: true })
+      .get(`${BASE_URL}backend/api/employees/view.php`, {
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data.success) {
           setEmployees(res.data.employees);
@@ -48,7 +59,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
 
     axios
       .post(
-        `${apiURL}backend/api/employees/delete.php`,
+        `${BASE_URL}backend/api/employees/delete.php`,
         { id },
         {
           headers: { "Content-Type": "application/json" },
@@ -66,7 +77,9 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
 
   const fetchDepartments = () => {
     axios
-      .get(`${apiURL}backend/api/department/fetctDepartment.php`, { withCredentials: true })
+      .get(`${BASE_URL}backend/api/department/fetctDepartment.php`, {
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data.success) {
           setDepartments(res.data.departments);
@@ -76,37 +89,40 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
 
   // When a department is selected, fetch employees for that department
   const handleDepartmentChange = (e) => {
-  const deptId = e.target.value;
-  setSelectedDept(deptId);
-  if (!deptId) {
-    setDeptEmployeeCount(null);
-    fetchEmployees();
-    return;
-  }
+    const deptId = e.target.value;
+    setSelectedDept(deptId);
+    if (!deptId) {
+      setDeptEmployeeCount(null);
+      fetchEmployees();
+      return;
+    }
 
-  setLoading(true);
-  axios
-    .post(
-      `${apiURL}backend/api/employees/count_by_department.php`,
-      { department_id: deptId },
-      { headers: { "Content-Type": "application/json" }, withCredentials: true }
-    )
-    .then((res) => {
-      if (res.data.success) {
-        setEmployees(res.data.employees);
-        setDeptEmployeeCount(res.data.employees.length);
-      } else {
+    setLoading(true);
+    axios
+      .post(
+        `${BASE_URL}backend/api/employees/count_by_department.php`,
+        { department_id: deptId },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((res) => {
+        if (res.data.success) {
+          setEmployees(res.data.employees);
+          setDeptEmployeeCount(res.data.employees.length);
+        } else {
+          setEmployees([]);
+          setDeptEmployeeCount(0);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
         setEmployees([]);
         setDeptEmployeeCount(0);
-      }
-      setLoading(false);
-    })
-    .catch(() => {
-      setEmployees([]);
-      setDeptEmployeeCount(0);
-      setLoading(false);
-    });
-};
+        setLoading(false);
+      });
+  };
 
   // search filter
   const filteredEmployees = employees.filter(
@@ -118,25 +134,28 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
   // pagination slicing only if department not selected
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentEmployees = selectedDept ? filteredEmployees : filteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  const currentEmployees = selectedDept
+    ? filteredEmployees
+    : filteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
 
   // Excel download function
   const downloadExcel = () => {
-    const deptName = departments.find(d => d.id == selectedDept)?.name || "Unknown";
+    const deptName =
+      departments.find((d) => d.id == selectedDept)?.name || "Unknown";
 
     // Header + Sub-header
     const rows = [
-      ["Employee List"],       
-      [`Department: ${deptName}`],               
-      [],                                         
-      ["ID", "Name", "Email", "Phone Number"],   
-      ...filteredEmployees.map(emp => [
+      ["Employee List"],
+      [`Department: ${deptName}`],
+      [],
+      ["ID", "Name", "Email", "Phone Number"],
+      ...filteredEmployees.map((emp) => [
         emp.id,
         `${emp.first_name} ${emp.last_name}`,
         emp.email,
         emp.phone || "",
-      ])
+      ]),
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -157,7 +176,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
 
     XLSX.writeFile(wb, `Employees_${deptName.replace(/\s+/g, "_")}.xlsx`);
   };
-
 
   return (
     <div>
@@ -201,7 +219,12 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
           <p>
             <strong>Total Employees:</strong> {deptEmployeeCount ?? 0}
           </p>
-          <Button onClick={downloadExcel} variant="success" size="sm" className="mb-3">
+          <Button
+            onClick={downloadExcel}
+            variant="success"
+            size="sm"
+            className="mb-3"
+          >
             Download Excel
           </Button>
           {loading ? (
@@ -210,14 +233,14 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
             // শুধু নামের list দেখানো হচ্ছে department select হলে
             <ul>
               {filteredEmployees.map((emp) => (
-              <li key={emp.id}>
-                {emp.first_name} {emp.last_name} - {emp.email}
-              </li>
+                <li key={emp.id}>
+                  {emp.first_name} {emp.last_name} - {emp.email}
+                </li>
               ))}
             </ul>
-            )}
-          </div>
           )}
+        </div>
+      )}
       {!selectedDept && (
         <Card>
           <Card.Body>
@@ -238,7 +261,9 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                     {currentEmployees.map((e) => (
                       <tr key={e.id}>
                         <td>{e.id}</td>
-                        <td>{e.first_name} {e.last_name}</td>
+                        <td>
+                          {e.first_name} {e.last_name}
+                        </td>
                         <td>{e.email}</td>
                         <td>
                           <Button
@@ -252,7 +277,11 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                           >
                             View
                           </Button>
-                          <Button size="sm" variant="danger" onClick={() => handleDelete(e.id)}>
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={() => handleDelete(e.id)}
+                          >
                             Delete
                           </Button>
                         </td>
@@ -287,11 +316,22 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
         <Modal.Body>
           {selectedEmployee && (
             <>
-              <p><strong>Name   :</strong> {selectedEmployee.first_name} {selectedEmployee.last_name}</p>
-              <p><strong>Email  :</strong> {selectedEmployee.email}</p>
-              <p><strong>Phone  :</strong> {selectedEmployee.phone}</p>
-              <p><strong>Role   :</strong> {selectedEmployee.user_role}</p>
-              <p><strong>Department:</strong> {selectedEmployee.department_name}</p>
+              <p>
+                <strong>Name :</strong> {selectedEmployee.first_name}{" "}
+                {selectedEmployee.last_name}
+              </p>
+              <p>
+                <strong>Email :</strong> {selectedEmployee.email}
+              </p>
+              <p>
+                <strong>Phone :</strong> {selectedEmployee.phone}
+              </p>
+              <p>
+                <strong>Role :</strong> {selectedEmployee.user_role}
+              </p>
+              <p>
+                <strong>Department:</strong> {selectedEmployee.department_name}
+              </p>
             </>
           )}
         </Modal.Body>

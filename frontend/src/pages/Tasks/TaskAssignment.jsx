@@ -15,7 +15,7 @@ const TaskAssignment = () => {
   const [taskFiles, setTaskFiles] = useState([]);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   // file input er jonno ref
   const fileInputRef = useRef(null);
@@ -23,7 +23,9 @@ const TaskAssignment = () => {
   // Load all groups on mount
   useEffect(() => {
     axios
-      .get(`${apiURL}backend/api/groups/fetchAllGroups.php`, { withCredentials: true })
+      .get(`${BASE_URL}backend/api/groups/fetchAllGroups.php`, {
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data.success) {
           setGroups(res.data.groups);
@@ -45,7 +47,7 @@ const TaskAssignment = () => {
     }
     axios
       .post(
-        `${apiURL}backend/api/employees/fetchGroupEmployees.php`,
+        `${BASE_URL}backend/api/employees/fetchGroupEmployees.php`,
         { group_id: selectedGroup },
         { withCredentials: true }
       )
@@ -78,7 +80,12 @@ const TaskAssignment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedGroup || selectedEmployees.length === 0 || !taskTitle || !deadline) {
+    if (
+      !selectedGroup ||
+      selectedEmployees.length === 0 ||
+      !taskTitle ||
+      !deadline
+    ) {
       setMessage({ type: "error", text: "All required fields must be filled" });
       return;
     }
@@ -92,18 +99,25 @@ const TaskAssignment = () => {
       selectedEmployees.forEach((id) => formData.append("employee_ids[]", id));
       formData.append("task_title", taskTitle);
       formData.append("task_note", taskNote);
-      formData.append("deadline", deadline ? deadline.toISOString().split("T")[0] : "");
+      formData.append(
+        "deadline",
+        deadline ? deadline.toISOString().split("T")[0] : ""
+      );
 
       for (let i = 0; i < taskFiles.length; i++) {
         formData.append("task_files[]", taskFiles[i]);
       }
 
-      const res = await axios.post(`${apiURL}backend/api/tasks/assign.php`, formData, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        `${BASE_URL}backend/api/tasks/assign.php`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (res.data.success) {
         setMessage({ type: "success", text: res.data.message });
@@ -122,10 +136,16 @@ const TaskAssignment = () => {
           fileInputRef.current.value = null;
         }
       } else {
-        setMessage({ type: "error", text: res.data.message || "Failed to assign task" });
+        setMessage({
+          type: "error",
+          text: res.data.message || "Failed to assign task",
+        });
       }
     } catch (err) {
-      setMessage({ type: "error", text: err.response?.data?.message || "Server error" });
+      setMessage({
+        type: "error",
+        text: err.response?.data?.message || "Server error",
+      });
     } finally {
       setLoading(false);
     }
@@ -175,7 +195,10 @@ const TaskAssignment = () => {
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Select Employees</Form.Label>
-                <div className="border rounded p-2" style={{ maxHeight: "200px", overflowY: "auto" }}>
+                <div
+                  className="border rounded p-2"
+                  style={{ maxHeight: "200px", overflowY: "auto" }}
+                >
                   {employees.map((emp) => (
                     <div key={emp.id}>
                       <Form.Check

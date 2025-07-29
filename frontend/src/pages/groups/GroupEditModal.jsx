@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import {
-  Modal, Button, Form, FloatingLabel, Alert
-} from 'react-bootstrap';
-import { XCircle, PlusCircle, CheckCircle, X } from 'react-bootstrap-icons';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Modal, Button, Form, FloatingLabel, Alert } from "react-bootstrap";
+import { XCircle, PlusCircle, CheckCircle, X } from "react-bootstrap-icons";
 
 const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
-  const [groupName, setGroupName] = useState('');
-  const [description, setDescription] = useState('');
-  const [employeeIds, setEmployeeIds] = useState(['']);
+  const [groupName, setGroupName] = useState("");
+  const [description, setDescription] = useState("");
+  const [employeeIds, setEmployeeIds] = useState([""]);
   const [response, setResponse] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (groupData) {
-      setGroupName(groupData.group_name || '');
-      setDescription(groupData.description || '');
+      setGroupName(groupData.group_name || "");
+      setDescription(groupData.description || "");
       setEmployeeIds(
-        groupData.members?.map((member) => member.id.toString()) || ['']
+        groupData.members?.map((member) => member.id.toString()) || [""]
       );
     }
   }, [groupData]);
@@ -30,7 +28,7 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
   };
 
   const addEmployeeField = () => {
-    setEmployeeIds([...employeeIds, '']);
+    setEmployeeIds([...employeeIds, ""]);
   };
 
   const removeEmployeeField = (index) => {
@@ -49,16 +47,20 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
       group_id: groupData.group_id,
       group_name: groupName.trim(),
       description: description.trim(),
-      employee_ids: employeeIds.filter(id => id.trim() !== ''),
+      employee_ids: employeeIds.filter((id) => id.trim() !== ""),
     };
 
     try {
-      const res = await axios.post(`${apiURL}backend/api/groups/edit.php`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true,
-      });
+      const res = await axios.post(
+        `${BASE_URL}backend/api/groups/edit.php`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
       setResponse(res.data);
 
@@ -69,7 +71,7 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
     } catch (error) {
       setResponse({
         success: false,
-        message: error.response?.data?.message || 'Network error',
+        message: error.response?.data?.message || "Network error",
         error: error.message,
       });
     } finally {
@@ -78,9 +80,9 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
   };
 
   const resetForm = () => {
-    setGroupName('');
-    setDescription('');
-    setEmployeeIds(['']);
+    setGroupName("");
+    setDescription("");
+    setEmployeeIds([""]);
     setResponse(null);
   };
 
@@ -97,7 +99,11 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
 
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
-          <FloatingLabel controlId="groupName" label="Group Name" className="mb-3">
+          <FloatingLabel
+            controlId="groupName"
+            label="Group Name"
+            className="mb-3"
+          >
             <Form.Control
               type="text"
               placeholder="Enter group name"
@@ -108,11 +114,15 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
             />
           </FloatingLabel>
 
-          <FloatingLabel controlId="description" label="Description" className="mb-3">
+          <FloatingLabel
+            controlId="description"
+            label="Description"
+            className="mb-3"
+          >
             <Form.Control
               as="textarea"
               placeholder="Enter description"
-              style={{ height: '100px' }}
+              style={{ height: "100px" }}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -150,7 +160,10 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
           </div>
 
           {response && (
-            <Alert variant={response.success ? 'success' : 'danger'} className="d-flex align-items-center">
+            <Alert
+              variant={response.success ? "success" : "danger"}
+              className="d-flex align-items-center"
+            >
               {response.success ? (
                 <CheckCircle className="me-2" />
               ) : (
@@ -158,7 +171,7 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
               )}
               <div>
                 <Alert.Heading className="h6 mb-1">
-                  {response.success ? 'Success!' : 'Error!'}
+                  {response.success ? "Success!" : "Error!"}
                 </Alert.Heading>
                 <p className="mb-0 small">{response.message}</p>
               </div>
@@ -169,12 +182,8 @@ const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
             <Button variant="outline-secondary" onClick={handleModalClose}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Updating...' : 'Update Group'}
+            <Button variant="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Updating..." : "Update Group"}
             </Button>
           </div>
         </Form>

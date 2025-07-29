@@ -6,7 +6,7 @@ const DepartmentCreateModal = ({ show, handleClose, refreshDepartments }) => {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
 
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +19,7 @@ const DepartmentCreateModal = ({ show, handleClose, refreshDepartments }) => {
 
     try {
       const res = await axios.post(
-        `${apiURL}backend/api/department/create.php`,
+        `${BASE_URL}backend/api/department/create.php`,
         { name },
         {
           headers: { "Content-Type": "application/json" },

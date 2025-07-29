@@ -11,7 +11,7 @@ const DepartmentEditModal = ({
   const [name, setName] = useState(departmentData.name || "");
   const [error, setError] = useState("");
 
-  const apiURL = import.meta.env.VITE_API_URL;
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     setName(departmentData.name || "");
@@ -28,7 +28,7 @@ const DepartmentEditModal = ({
 
     try {
       const res = await axios.post(
-        `${apiURL}backend/api/department/edit.php`,
+        `${BASE_URL}backend/api/department/edit.php`,
         { id: departmentData.id, name },
         {
           headers: { "Content-Type": "application/json" },

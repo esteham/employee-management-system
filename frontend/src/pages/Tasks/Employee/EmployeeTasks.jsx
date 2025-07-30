@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, Spinner, Alert, Badge, Card, Button } from "react-bootstrap";
-import TaskProgressModal from "./TaskProgressModal"; 
+import TaskProgressModal from "./TaskProgressModal";
 import TaskDetailsModal from "./TaskDetailsModal";
-
 
 const EmployeeTasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -14,7 +13,6 @@ const EmployeeTasks = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTaskDetails, setSelectedTaskDetails] = useState(null);
   const BASE_URL = import.meta.env.VITE_API_URL;
-
 
   useEffect(() => {
     fetchTasks();
@@ -60,13 +58,19 @@ const EmployeeTasks = () => {
     setSelectedTaskDetails(null);
   };
 
-
   if (loading) return <Spinner animation="border" variant="primary" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
     <>
-      <Card className="mt-3">
+      <Card
+        className="mt-3"
+        style={{
+          transition: "none",
+          transform: "none",
+          boxShadow: "none",
+        }}
+      >
         <Card.Header>📋 My Assigned Tasks</Card.Header>
         <Card.Body>
           <Table striped bordered hover responsive>
@@ -97,7 +101,8 @@ const EmployeeTasks = () => {
                     {task.files.length > 0 ? (
                       task.files.map((file, index) => (
                         <div key={index}>
-                          <a style={{ textDecoration: 'none' }}
+                          <a
+                            style={{ textDecoration: "none" }}
                             href={`${BASE_URL}backend/assets/uploads/tasks/${file}`}
                             target="_blank"
                             rel="noreferrer"

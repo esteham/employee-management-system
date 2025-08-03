@@ -37,15 +37,15 @@ const LoginFetch = () => {
           },
           credentials: "include",
           body: JSON.stringify({
-            username: values.username,
-            password: values.password,
+            username: formik.values.username,
+            password: formik.values.password,
           }),
         });
 
         const data = await response.json();
 
         if (data.success) {
-          login({ username: values.username, role: data.role });
+          login({ username: formik.values.username, role: data.role });
           navigate(
             data.role === "admin"
               ? "/AdminDashboard"

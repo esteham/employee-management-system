@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -61,6 +62,7 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
       emergency_name: "",
       emergency_phone: "",
       emergency_relation: "",
+      image: null,
       certificate: null,
       experience: null,
     },
@@ -335,6 +337,22 @@ const EmployeeRegistrationModal = ({ show, handleClose }) => {
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.address}
                   </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group className="mt-3">
+                  <Form.Label className="d-flex align-item-center">
+                    <FiUpload className="me-2" />Photo
+                  </Form.Label>
+                  <Form.Control
+                    type="file"
+                    name="image"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                  />
+                  {formik.values.image &&(
+                    <div className="mt-2 small text-muted">
+                      Select: {formik.values.image.name}
+                    </div>
+                  )}
                 </Form.Group>
               </div>
             </div>

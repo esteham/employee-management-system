@@ -231,7 +231,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
           {loading ? (
             <Spinner animation="border" />
           ) : (
-            // শুধু নামের list দেখানো হচ্ছে department select হলে
             <ul>
               {filteredEmployees.map((emp) => (
                 <li key={emp.id}>
@@ -253,6 +252,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                   <thead>
                     <tr>
                       <th>ID</th>
+                      <th>Image</th>
                       <th>Name</th>
                       <th>Email</th>
                       <th>Actions</th>
@@ -262,6 +262,17 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                     {currentEmployees.map((e) => (
                       <tr key={e.id}>
                         <td>{e.id}</td>
+                        <td>
+                          {e.image ? (
+                            <img
+                              src={`${BASE_URL}backend/assets/uploads/employee/${e.image}`}
+                              alt={`${e.first_name} ${e.last_name}`}
+                              style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "50%" }}
+                            />
+                          ) : (
+                            "No Image"
+                          )}
+                        </td>
                         <td>
                           {e.first_name} {e.last_name}
                         </td>

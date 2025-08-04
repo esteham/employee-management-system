@@ -17,7 +17,8 @@ try {
             'success' => true, 
             'departments' => $departments
         ]);
-} catch (Exception $e) {
+} 
+catch (Exception $e) {
     echo json_encode([
             'success' => false, 
             'message' => 'Error: ' . $e->getMessage()

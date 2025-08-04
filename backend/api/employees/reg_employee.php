@@ -27,6 +27,7 @@ try {
     $last_name      = $_POST['last_name'] ?? '';
     $email          = $_POST['email'] ?? '';
     $phone          = $_POST['phone'] ?? '';
+    $image          = $_POST['image'] ?? '';
     $username       = $_POST['username'] ?? '';
     $department_id  = $_POST['department_id'] ?? '';
 
@@ -42,17 +43,34 @@ try {
         exit;
     }
 
+    $image = null;
+
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $imageDir = '../../assets/uploads/employee/';
+        if (!is_dir($imageDir)) {
+            mkdir($imageDir, 0777, true);
+        }
+
+        $imageName = time() . '_' . basename($_FILES['image']['name']);
+        $imagePath = $imageDir . $imageName;
+
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $imagePath)) {
+            $image = $imageName;
+        }
+    }
+
     // Insert into employees table
     $stmt = $pdo->prepare("INSERT INTO 
-            employees (first_name, last_name, email, phone, department_id, address, emergency_name, emergency_phone, emergency_relation, join_date, status)
+            employees (first_name, last_name, email,  phone, image, department_id, address, emergency_name, emergency_phone, emergency_relation, join_date, status)
             VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), 'active')
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), 'active')
         ");
     $stmt->execute([
         $first_name,
         $last_name,
         $email,
         $phone,
+        $image,
         $department_id,
         $address,
         $emergency_name,

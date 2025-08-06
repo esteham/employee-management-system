@@ -23,6 +23,10 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
   const [departments, setDepartments] = useState([]);
   const [selectedDept, setSelectedDept] = useState("");
   const [deptEmployeeCount, setDeptEmployeeCount] = useState(null);
+  const [editModalShow, setEditModalShow] = useState(false);
+  const [editEmployeeData, setEditEmployeeData] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +67,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
         `${BASE_URL}backend/api/employees/delete.php`,
         { id },
         {
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         }
       )
@@ -214,7 +218,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
           </InputGroup>
         </div>
       </div>
-
       {selectedDept && (
         <div className="mb-3">
           <p>
@@ -267,7 +270,12 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                             <img
                               src={`${BASE_URL}backend/assets/uploads/employee/${e.image}`}
                               alt={`${e.first_name} ${e.last_name}`}
-                              style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "50%" }}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                objectFit: "cover",
+                                borderRadius: "50%",
+                              }}
                             />
                           ) : (
                             "No Image"
@@ -288,6 +296,17 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                             }}
                           >
                             View
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="warning"
+                            className="me-2"
+                            onClick={() => {
+                              setEditEmployeeData(e);
+                              setEditModalShow(true);
+                            }}
+                          >
+                            Edit
                           </Button>
                           <Button
                             size="sm"
@@ -345,6 +364,191 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                 <strong>Department:</strong> {selectedEmployee.department_name}
               </p>
             </>
+          )}
+        </Modal.Body>
+      </Modal>
+      <Modal show={editModalShow} onHide={() => setEditModalShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Employee</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editEmployeeData && (
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData();
+
+                formData.append("id", editEmployeeData.id);
+                formData.append("first_name", e.target.first_name.value);
+                formData.append("last_name", e.target.last_name.value);
+                formData.append("email", e.target.email.value);
+                formData.append("phone", e.target.phone.value);
+                formData.append("address", e.target.address.value);
+                formData.append(
+                  "emergency_name",
+                  e.target.emergency_name.value
+                );
+                formData.append(
+                  "emergency_phone",
+                  e.target.emergency_phone.value
+                );
+                formData.append(
+                  "emergency_relation",
+                  e.target.emergency_relation.value
+                );
+                formData.append("department_id", e.target.department_id.value);
+
+                if (selectedImage) {
+                  formData.append("image", selectedImage);
+                }
+
+                axios
+                  .post(
+                    `${BASE_URL}backend/api/employees/update.php`,
+                    formData,
+                    {
+                      withCredentials: true,
+                    }
+                  )
+                  .then((res) => {
+                    if (res.data.success) {
+                      fetchEmployees();
+                      setEditModalShow(false);
+                    } else {
+                      alert(res.data.message);
+                    }
+                  })
+                  .catch((err) => {
+                    console.error("Update failed", err);
+                  });
+              }}
+            >
+              <Form.Group className="mb-3">
+                <Form.Label>First Name</Form.Label>
+                <Form.Control
+                  name="first_name"
+                  defaultValue={editEmployeeData.first_name}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Last Name</Form.Label>
+                <Form.Control
+                  name="last_name"
+                  defaultValue={editEmployeeData.last_name}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  name="email"
+                  type="email"
+                  defaultValue={editEmployeeData.email}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Phone</Form.Label>
+                <Form.Control
+                  name="phone"
+                  defaultValue={editEmployeeData.phone}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  name="address"
+                  as="textarea"
+                  rows={2}
+                  defaultValue={editEmployeeData.address}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Emergency Contact Name</Form.Label>
+                <Form.Control
+                  name="emergency_name"
+                  defaultValue={editEmployeeData.emergency_name}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Emergency Contact Phone</Form.Label>
+                <Form.Control
+                  name="emergency_phone"
+                  defaultValue={editEmployeeData.emergency_phone}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Emergency Contact Relation</Form.Label>
+                <Form.Control
+                  name="emergency_relation"
+                  defaultValue={editEmployeeData.emergency_relation}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Department</Form.Label>
+                <Form.Select
+                  name="department_id"
+                  defaultValue={editEmployeeData.department_id}
+                >
+                  <option value="">-- Select Department --</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group controlId="formImage" className="mb-3">
+                <Form.Label>Profile Image</Form.Label>
+                {previewImage ? (
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      objectFit: "cover",
+                      display: "block",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : editEmployeeData.image ? (
+                  <img
+                    src={`${BASE_URL}backend/assets/uploads/employee/${editEmployeeData.image}`}
+                    alt="Current"
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      objectFit: "cover",
+                      display: "block",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : null}
+
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  name="image"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    setSelectedImage(file);
+                    setPreviewImage(URL.createObjectURL(file));
+                  }}
+                />
+              </Form.Group>
+
+              <Button type="submit" variant="primary">
+                Save Changes
+              </Button>
+            </Form>
           )}
         </Modal.Body>
       </Modal>

@@ -432,7 +432,7 @@ class Admin
     ===========================*/
 
     /* =================
-    Group create functio
+    Group create function
     ====================*/
     public function createGroup($group_name, $description, $created_by){
         $stmt = $this->pdo->prepare("INSERT INTO groups (group_name, description, created_by) VALUES (?, ?, ?)");
@@ -469,11 +469,11 @@ class Admin
     }
 
     /* =====================
-    End Group functio
+    End Group function
     ========================*/
 
     /* =====================
-    Department functio
+    Department function
     ========================*/
     public function getAllDepartments() {
         $sql = "SELECT id, name FROM departments ORDER BY name ASC";
@@ -523,7 +523,7 @@ class Admin
     }
 
     /* =====================
-    End Department functio
+    End Department function
     ========================*/
 
 

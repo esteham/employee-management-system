@@ -13,6 +13,7 @@ import {
 import { PersonPlusFill } from "react-bootstrap-icons";
 import axios from "axios";
 import * as XLSX from "xlsx";
+import EditEmployeeModal from "./Pages/EditEmployeeModal";
 
 const EmployeesContent = ({ setShowEmployeeModal }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,8 +26,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
   const [deptEmployeeCount, setDeptEmployeeCount] = useState(null);
   const [editModalShow, setEditModalShow] = useState(false);
   const [editEmployeeData, setEditEmployeeData] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,7 +66,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
         `${BASE_URL}backend/api/employees/delete.php`,
         { id },
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       )
@@ -92,7 +91,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
       });
   };
 
-  // When a department is selected, fetch employees for that department
   const handleDepartmentChange = (e) => {
     const deptId = e.target.value;
     setSelectedDept(deptId);
@@ -129,14 +127,12 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
       });
   };
 
-  // search filter
   const filteredEmployees = employees.filter(
     (e) =>
       e.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.id.toString().includes(searchTerm)
   );
 
-  // pagination slicing only if department not selected
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = selectedDept
@@ -144,12 +140,10 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
     : filteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
 
-  // Excel download function
   const downloadExcel = () => {
     const deptName =
       departments.find((d) => d.id == selectedDept)?.name || "Unknown";
 
-    // Header + Sub-header
     const rows = [
       ["Employee List"],
       [`Department: ${deptName}`],
@@ -165,7 +159,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
 
-    // Auto width set
     const colWidths = rows[3].map((_, colIndex) => {
       const maxLen = rows.reduce((max, row) => {
         const val = row[colIndex];
@@ -218,6 +211,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
           </InputGroup>
         </div>
       </div>
+
       {selectedDept && (
         <div className="mb-3">
           <p>
@@ -244,6 +238,7 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
           )}
         </div>
       )}
+
       {!selectedDept && (
         <Card>
           <Card.Body>
@@ -321,7 +316,6 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
                   </tbody>
                 </Table>
 
-                {/* Pagination */}
                 <Pagination>
                   {[...Array(totalPages)].map((_, idx) => (
                     <Pagination.Item
@@ -367,191 +361,16 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
           )}
         </Modal.Body>
       </Modal>
-      <Modal show={editModalShow} onHide={() => setEditModalShow(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Employee</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {editEmployeeData && (
-            <Form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData();
 
-                formData.append("id", editEmployeeData.id);
-                formData.append("first_name", e.target.first_name.value);
-                formData.append("last_name", e.target.last_name.value);
-                formData.append("email", e.target.email.value);
-                formData.append("phone", e.target.phone.value);
-                formData.append("address", e.target.address.value);
-                formData.append(
-                  "emergency_name",
-                  e.target.emergency_name.value
-                );
-                formData.append(
-                  "emergency_phone",
-                  e.target.emergency_phone.value
-                );
-                formData.append(
-                  "emergency_relation",
-                  e.target.emergency_relation.value
-                );
-                formData.append("department_id", e.target.department_id.value);
-
-                if (selectedImage) {
-                  formData.append("image", selectedImage);
-                }
-
-                axios
-                  .post(
-                    `${BASE_URL}backend/api/employees/update.php`,
-                    formData,
-                    {
-                      withCredentials: true,
-                    }
-                  )
-                  .then((res) => {
-                    if (res.data.success) {
-                      fetchEmployees();
-                      setEditModalShow(false);
-                    } else {
-                      alert(res.data.message);
-                    }
-                  })
-                  .catch((err) => {
-                    console.error("Update failed", err);
-                  });
-              }}
-            >
-              <Form.Group className="mb-3">
-                <Form.Label>First Name</Form.Label>
-                <Form.Control
-                  name="first_name"
-                  defaultValue={editEmployeeData.first_name}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Last Name</Form.Label>
-                <Form.Control
-                  name="last_name"
-                  defaultValue={editEmployeeData.last_name}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  name="email"
-                  type="email"
-                  defaultValue={editEmployeeData.email}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Phone</Form.Label>
-                <Form.Control
-                  name="phone"
-                  defaultValue={editEmployeeData.phone}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Address</Form.Label>
-                <Form.Control
-                  name="address"
-                  as="textarea"
-                  rows={2}
-                  defaultValue={editEmployeeData.address}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Emergency Contact Name</Form.Label>
-                <Form.Control
-                  name="emergency_name"
-                  defaultValue={editEmployeeData.emergency_name}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Emergency Contact Phone</Form.Label>
-                <Form.Control
-                  name="emergency_phone"
-                  defaultValue={editEmployeeData.emergency_phone}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Emergency Contact Relation</Form.Label>
-                <Form.Control
-                  name="emergency_relation"
-                  defaultValue={editEmployeeData.emergency_relation}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Department</Form.Label>
-                <Form.Select
-                  name="department_id"
-                  defaultValue={editEmployeeData.department_id}
-                >
-                  <option value="">-- Select Department --</option>
-                  {departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-
-              <Form.Group controlId="formImage" className="mb-3">
-                <Form.Label>Profile Image</Form.Label>
-                {previewImage ? (
-                  <img
-                    src={previewImage}
-                    alt="Preview"
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  />
-                ) : editEmployeeData.image ? (
-                  <img
-                    src={`${BASE_URL}backend/assets/uploads/employee/${editEmployeeData.image}`}
-                    alt="Current"
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  />
-                ) : null}
-
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  name="image"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    setSelectedImage(file);
-                    setPreviewImage(URL.createObjectURL(file));
-                  }}
-                />
-              </Form.Group>
-
-              <Button type="submit" variant="primary">
-                Save Changes
-              </Button>
-            </Form>
-          )}
-        </Modal.Body>
-      </Modal>
+      {/* ✅ Reusable Edit Modal Component */}
+      <EditEmployeeModal
+        show={editModalShow}
+        onHide={() => setEditModalShow(false)}
+        employee={editEmployeeData}
+        departments={departments}
+        fetchEmployees={fetchEmployees}
+        BASE_URL={BASE_URL}
+      />
     </div>
   );
 };

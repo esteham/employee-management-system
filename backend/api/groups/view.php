@@ -34,28 +34,32 @@ try
 
     foreach($groups as $group)
     {
-        $memberStmt = $pdo->prepare("SELECT
-                                    e.id,
-                                    e.first_name,
-                                    e.email
-                                FROM group_members gm
-                                JOIN employees e ON gm.employee_id = e.id
-                                WHERE gm.group_id = ?
-                            ");
-        $memberStmt ->execute([$group['id']]);
-        $members    = $memberStmt->fetchAll();
+
+        $memberStmt = $pdo->prepare("
+            SELECT 
+                e.id,
+                e.first_name,
+                e.email,
+                d.name AS department_name
+            FROM group_members gm
+            JOIN employees e ON gm.employee_id = e.id
+            LEFT JOIN departments d ON e.department_id = d.id
+            WHERE gm.group_id = ?
+        ");
+        $memberStmt->execute([$group['id']]);
+        $members = $memberStmt->fetchAll();
 
         $result[] = [
-                     
-                    'group_id'      => $group['id'],
-                    'group_name'    => $group['group_name'],
-                    'description'   => $group['description'],
-                    'created_by'    => $group['created_by_username'],
-                    'created_role'  => $group['created_by_role'], 
-                    'created_at'    => $group['created_at'],
-                    'members'       => $members
-            ];
+            'group_id'      => $group['id'],
+            'group_name'    => $group['group_name'],
+            'description'   => $group['description'],
+            'created_by'    => $group['created_by_username'],
+            'created_role'  => $group['created_by_role'], 
+            'created_at'    => $group['created_at'],
+            'members'       => $members
+        ];
     }
+
 
     echo json_encode([
             'success' => true, 

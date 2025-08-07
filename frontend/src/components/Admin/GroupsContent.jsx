@@ -82,6 +82,8 @@ const GroupsContent = ({
                   <Card.Body>
                     <Card.Title>{group.group_name}</Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
+                      Department: {group.members && group.members.length > 0 ? group.members[0].department_name : "N/A"}
+                      <br/>
                       Created by: {group.created_by} ({group.created_role})
                       <br />
                       On: {new Date(group.created_at).toLocaleDateString()}

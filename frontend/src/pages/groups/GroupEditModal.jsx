@@ -15,368 +15,308 @@ import { XCircle, PlusCircle, CheckCircle, X } from "react-bootstrap-icons";
 const GroupEditModal = ({ show, handleClose, groupData, refreshGroups }) => {
   const [groupName, setGroupName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [employeeFields, setEmployeeFields] = useState([]);
-  const [response, setResponse] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [departments, setDepartments] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [departmentEmployees, setDepartmentEmployees] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
-
   const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (show && groupData) {
       resetForm();
       fetchDepartments();
-
+      
       setGroupName(groupData.group_name || "");
       setDescription(groupData.description || "");
       setSelectedDepartment(groupData.department_id || "");
-
-      const initialFields = groupData.members?.map((member) => ({
-        value: `${member.id} - ${member.first_name} ${member.last_name}`,
-        selectedId: member.id,
-        suggestions: [],
-      })) || [];
-
-      setEmployeeFields(initialFields.length ? initialFields : [{ value: "", selectedId: null, suggestions: [] }]);
     }
   }, [show, groupData]);
 
-  const fetchDepartments = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}backend/api/department/fetctDepartment.php`, {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        setDepartments(res.data.departments);
-      }
-    } catch (err) {
-      console.error("Failed to fetch departments:", err);
-    }
-  };
-
   useEffect(() => {
     if (selectedDepartment) {
-      setLoadingEmployees(true);
-      axios
-        .post(
-          `${BASE_URL}backend/api/employees/fetchByDepartment.php`,
-          { department_id: selectedDepartment },
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        )
-        .then((res) => {
-          setDepartmentEmployees(res.data.success ? res.data.employees : []);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch employees by department:", err);
-          setDepartmentEmployees([]);
-        })
-        .finally(() => {
-          setLoadingEmployees(false);
-        });
-    } else {
-      setDepartmentEmployees([]);
+      fetchDepartmentEmployees(selectedDepartment);
     }
   }, [selectedDepartment]);
 
-  const handleEmployeeChange = (index, input) => {
-    const updated = [...employeeFields];
-    updated[index].value = input;
-    updated[index].selectedId = null;
-
-    updated[index].suggestions = departmentEmployees.filter((emp) => {
-      const fullName = `${emp.first_name || ""} ${emp.last_name || ""}`.toLowerCase();
-      return (
-        emp.id?.toString().includes(input.toLowerCase()) ||
-        fullName.includes(input.toLowerCase())
+  useEffect(() => {
+    if (show && groupData && selectedDepartment && departmentEmployees.length > 0) {
+      // Set initial selected employees from groupData
+      const initialSelected = groupData.members?.map(member => ({
+        id: member.id,
+        first_name: member.first_name,
+        last_name: member.last_name,
+        email: member.email
+      })) || [];
+      
+      // Ensure all selected employees are valid
+      const validSelected = initialSelected.filter(emp =>
+        emp.id && emp.first_name && emp.last_name
       );
-    });
-
-    setEmployeeFields(updated);
-  };
-
-  const selectSuggestion = (index, emp) => {
-    const updated = [...employeeFields];
-    updated[index].value = `${emp.id} - ${emp.first_name} ${emp.last_name}`;
-    updated[index].selectedId = emp.id;
-    updated[index].suggestions = [];
-    setEmployeeFields(updated);
-  };
-
-  const addEmployeeField = () => {
-    setEmployeeFields([
-      ...employeeFields,
-      { value: "", selectedId: null, suggestions: [] },
-    ]);
-  };
-
-  const removeEmployeeField = (index) => {
-    if (employeeFields.length > 1) {
-      const updated = [...employeeFields];
-      updated.splice(index, 1);
-      setEmployeeFields(updated);
+      
+      setSelectedEmployees(validSelected);
     }
-  };
+  }, [groupData, selectedDepartment, departmentEmployees, show]);
 
   const resetForm = () => {
     setGroupName("");
     setDescription("");
     setSelectedDepartment("");
-    setEmployeeFields([{ value: "", selectedId: null, suggestions: [] }]);
-    setResponse(null);
+    setSelectedEmployees([]);
+    setError("");
+    setSuccessMessage("");
+    setIsSubmitting(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const fetchDepartments = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}backend/api/department/fetctDepartment.php`,{
+        withCredentials:true,
+      });
+      setDepartments(response.data.departments || []);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    }
+  };
 
-    const payload = {
-      group_id: groupData.group_id,
-      group_name: groupName.trim(),
-      description: description.trim(),
-      employee_ids: employeeFields
-        .map((e) => e.selectedId)
-        .filter((id) => !!id),
-    };
+  const fetchDepartmentEmployees = async (departmentId) => {
+    setLoadingEmployees(true);
+    try {
+      const response = await axios.post(
+        `${BASE_URL}backend/api/employees/fetchByDepartment.php`,
+        { department_id: departmentId },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      
+      if (response.data.success) {
+        setDepartmentEmployees(response.data.employees || []);
+      } else {
+        setDepartmentEmployees([]);
+      }
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      setDepartmentEmployees([]);
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
+
+  const handleAddEmployee = (employee) => {
+    if (employee.id && employee.first_name && employee.last_name &&
+        !selectedEmployees.some(emp => emp.id === employee.id)) {
+      setSelectedEmployees(prev => [...prev, employee]);
+    }
+  };
+
+  const handleRemoveEmployee = (employeeId) => {
+    setSelectedEmployees(prev => prev.filter(emp => emp.id !== employeeId));
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError("");
+    setSuccessMessage("");
+
+    if (!groupName.trim() || !selectedDepartment) {
+      setError("Please provide group name and select department.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (selectedEmployees.length === 0) {
+      setError("Please select at least one employee.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const employeeIds = selectedEmployees.map(emp => emp.id);
 
     try {
-      const res = await axios.post(
+      const response = await axios.post(
         `${BASE_URL}backend/api/groups/edit.php`,
-        payload,
+        {
+          group_id: groupData.group_id,
+          group_name: groupName,
+          department_id: selectedDepartment,
+          description,
+          employees: employeeIds,
+        },
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
 
-      setResponse(res.data);
-      if (res.data.success) {
-        if (refreshGroups) refreshGroups();
-        setTimeout(() => handleClose(), 2000);
+      if (response.data.success) {
+        setSuccessMessage("Group updated successfully!");
+        refreshGroups();
+        setTimeout(() => {
+          handleClose();
+        }, 1000);
+      } else {
+        setError(response.data.message || "Failed to update group.");
       }
     } catch (error) {
-      setResponse({
-        success: false,
-        message: error.response?.data?.message || "Network error",
-        error: error.message,
-      });
+      console.error("Error updating group:", error);
+      setError("An error occurred while updating the group.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleModalClose = () => {
-    resetForm();
-    handleClose();
+  // Get department name for display
+  const getDepartmentName = (deptId) => {
+    const dept = departments.find(d => d.id === deptId || d.id === parseInt(deptId));
+    return dept ? dept.name : "";
+  };
+
+  // Get employees not currently in the group
+  const getAvailableEmployees = () => {
+    return departmentEmployees.filter(emp =>
+      emp.id && emp.first_name && emp.last_name &&
+      !selectedEmployees.some(selectedEmp => selectedEmp.id === emp.id)
+    );
   };
 
   return (
-    <Modal show={show} onHide={handleModalClose} centered backdrop="static">
-      <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="h5 fw-bold">Edit Group</Modal.Title>
+    <Modal show={show} onHide={handleClose} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Group</Modal.Title>
       </Modal.Header>
-
       <Modal.Body>
-        <Form onSubmit={handleSubmit}>
-          <FloatingLabel controlId="groupName" label="Group Name" className="mb-3">
-            <Form.Control
-              type="text"
-              placeholder="Enter group name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              required
-              autoFocus
-            />
-          </FloatingLabel>
+        {error && <Alert variant="danger">{error}</Alert>}
+        {successMessage && <Alert variant="success">{successMessage}</Alert>}
 
-          <FloatingLabel controlId="description" label="Description" className="mb-3">
-            <Form.Control
-              as="textarea"
-              placeholder="Enter description"
-              style={{ height: "100px" }}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </FloatingLabel>
+        <FloatingLabel label="Group Name" className="mb-3">
+          <Form.Control
+            type="text"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Enter group name"
+          />
+        </FloatingLabel>
 
-          {/* Department Selection - Disabled */}
-          <Form.Group className="mb-3">
-            <Form.Label>Department</Form.Label>
-            <Form.Control
-              as="select"
-              value={selectedDepartment}
-              disabled
+        <Form.Group className="mb-3">
+          <Form.Label>Department</Form.Label>
+          <Form.Control
+            type="text"
+            value={getDepartmentName(selectedDepartment)}
+            readOnly
+            className="bg-light"
+          />
+        </Form.Group>
+
+        <FloatingLabel label="Description" className="mb-3">
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter group description"
+          />
+        </FloatingLabel>
+
+        {/* Selected Employees */}
+        <Form.Group className="mb-3">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <Form.Label className="fw-bold">Group Members</Form.Label>
+            <Badge bg="primary" className="rounded-pill">
+              {selectedEmployees.length} selected
+            </Badge>
+          </div>
+          
+          {selectedEmployees.length > 0 ? (
+            <div 
+              className="border rounded p-2 mb-3" 
+              style={{ maxHeight: "150px", overflowY: "auto" }}
             >
-              <option value="">Select a department</option>
-              {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.name}
-                </option>
-              ))}
-            </Form.Control>
-            <Form.Text className="text-muted">
-              Department cannot be changed for an existing group
-            </Form.Text>
-          </Form.Group>
-
-          {/* Employee Section */}
-          {selectedDepartment && (
-            <div className="mb-3">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <Form.Label className="fw-semibold">Employees</Form.Label>
-                <Badge bg="light" text="dark" className="rounded-pill">
-                  {employeeFields.filter((e) => e.selectedId !== null).length} selected
-                </Badge>
-              </div>
-
-              {loadingEmployees ? (
-                <div className="text-center py-3">
-                  <Spinner animation="border" variant="primary" size="sm" />
-                  <span className="ms-2">Loading employees...</span>
-                </div>
-              ) : departmentEmployees.length > 0 ? (
-                <>
-                  <div className="mb-3">
-                    <h6 className="small fw-bold mb-2">
-                      Available in {departments.find(d => d.id === selectedDepartment)?.name}:
-                    </h6>
-                    <div
-                      className="border rounded p-2 mb-3 bg-light"
-                      style={{ maxHeight: "150px", overflowY: "auto" }}
-                    >
-                      {departmentEmployees.map((emp) => {
-                        const isAdded = employeeFields.some(f => f.selectedId === emp.id);
-                        return (
-                          <div
-                            key={emp.id}
-                            className={`py-1 px-2 small d-flex justify-content-between align-items-center ${isAdded ? 'text-muted' : ''}`}
-                          >
-                            <span>{emp.id} - {emp.first_name} {emp.last_name}</span>
-                            {isAdded ? (
-                              <Badge bg="success" className="rounded-pill">Added</Badge>
-                            ) : (
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() => {
-                                  const emptyIndex = employeeFields.findIndex(f => !f.selectedId);
-                                  if (emptyIndex >= 0) {
-                                    selectSuggestion(emptyIndex, emp);
-                                  } else {
-                                    addEmployeeField();
-                                    setTimeout(() => {
-                                      const newIndex = employeeFields.length;
-                                      selectSuggestion(newIndex, emp);
-                                    }, 0);
-                                  }
-                                }}
-                              >
-                                Add
-                              </Button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Selected Employees */}
-                  <h6 className="small fw-bold mb-2">Selected Employees:</h6>
-                  {employeeFields.map((field, index) => (
-                    <div key={index} className="mb-3 position-relative">
-                      <div className="d-flex align-items-center">
-                        <Form.Control
-                          type="text"
-                          placeholder={`Search employee #${index + 1}`}
-                          value={field.value}
-                          onChange={(e) =>
-                            handleEmployeeChange(index, e.target.value)
-                          }
-                          autoComplete="off"
-                          className="flex-grow-1"
-                        />
-                        <Button
-                          variant="outline-danger"
-                          onClick={() => removeEmployeeField(index)}
-                          className="ms-2"
-                          disabled={employeeFields.length <= 1}
-                        >
-                          <XCircle />
-                        </Button>
-                      </div>
-
-                      {/* Suggestions */}
-                      {field.suggestions.length > 0 && (
-                        <ListGroup
-                          className="position-absolute w-100 shadow zindex-tooltip"
-                          style={{ zIndex: 999 }}
-                        >
-                          {field.suggestions.slice(0, 5).map((emp) => (
-                            <ListGroup.Item
-                              key={emp.id}
-                              action
-                              onClick={() => selectSuggestion(index, emp)}
-                              className="small"
-                            >
-                              {emp.id} - {emp.first_name} {emp.last_name}
-                            </ListGroup.Item>
-                          ))}
-                        </ListGroup>
-                      )}
-                    </div>
-                  ))}
-
-                  <Button
-                    variant="outline-primary"
-                    onClick={addEmployeeField}
-                    className="w-100 mt-2 d-flex align-items-center justify-content-center"
+              {selectedEmployees.map((emp) => (
+                <div 
+                  key={emp.id} 
+                  className="py-1 px-2 small d-flex justify-content-between align-items-center"
+                >
+                  <span>
+                    {emp.id} - {emp.first_name} {emp.last_name}
+                  </span>
+                  <Button 
+                    variant="outline-danger" 
+                    size="sm"
+                    onClick={() => handleRemoveEmployee(emp.id)}
                   >
-                    <PlusCircle className="me-2" />
-                    Add Another Employee Field
+                    <X size={16} />
                   </Button>
-                </>
-              ) : (
-                <Alert variant="info" className="small">
-                  No employees found in this department.
-                </Alert>
-              )}
+                </div>
+              ))}
             </div>
-          )}
-
-          {response && (
-            <Alert variant={response.success ? "success" : "danger"} className="d-flex align-items-center">
-              {response.success ? <CheckCircle className="me-2" /> : <X className="me-2" />}
-              <div>
-                <Alert.Heading className="h6 mb-1">
-                  {response.success ? "Success!" : "Error!"}
-                </Alert.Heading>
-                <p className="mb-0 small">{response.message}</p>
-              </div>
+          ) : (
+            <Alert variant="info" className="small">
+              No employees selected for this group.
             </Alert>
           )}
+        </Form.Group>
 
-          <div className="d-flex justify-content-end gap-2 mt-4">
-            <Button variant="outline-secondary" onClick={handleModalClose}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  Updating...
-                </>
-              ) : (
-                "Update Group"
-              )}
-            </Button>
-          </div>
-        </Form>
+        {/* Available Employees */}
+        {selectedDepartment && (
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-bold">Available Employees</Form.Label>
+            {loadingEmployees ? (
+              <div className="text-center py-3">
+                <Spinner animation="border" variant="primary" size="sm" />
+                <span className="ms-2">Loading employees...</span>
+              </div>
+            ) : getAvailableEmployees().length > 0 ? (
+              <div 
+                className="border rounded p-2" 
+                style={{ maxHeight: "150px", overflowY: "auto" }}
+              >
+                {getAvailableEmployees().map((emp) => (
+                  <div 
+                    key={emp.id} 
+                    className="py-1 px-2 small d-flex justify-content-between align-items-center"
+                  >
+                    <span>
+                      {emp.id} - {emp.first_name} {emp.last_name}
+                    </span>
+                    <Button 
+                      variant="outline-primary" 
+                      size="sm"
+                      onClick={() => handleAddEmployee(emp)}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Alert variant="info" className="small">
+                No additional employees available in this department.
+              </Alert>
+            )}
+          </Form.Group>
+        )}
       </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button variant="success" onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Spinner animation="border" size="sm" /> Updating...
+            </>
+          ) : (
+            <>
+              <CheckCircle className="me-1" /> Update Group
+            </>
+          )}
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 };

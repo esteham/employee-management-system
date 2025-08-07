@@ -18,14 +18,17 @@ $emergency_relation = $_POST['emergency_relation'];
 $department_id = $_POST['department_id'];
 
 try {
-    // যদি নতুন ছবি দেয়া হয়
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        // Step 1: আগের ছবি খুঁজে বের করো
+        $uploadDir = '../../assets/uploads/employee/';
+
+        if (!is_dir($uploadDir)){
+            mkdir($uploadDir, 0755, true);
+        }
+
         $stmt = $pdo->prepare("SELECT image FROM employees WHERE id = ?");
         $stmt->execute([$id]);
         $existingImage = $stmt->fetchColumn();
 
-        // Step 2: আগের ছবি থাকলে ডিলিট করো
         if ($existingImage) {
             $oldImagePath = '../../assets/uploads/employee/' . $existingImage;
             if (file_exists($oldImagePath)) {
@@ -33,7 +36,6 @@ try {
             }
         }
 
-        // Step 3: নতুন ছবি আপলোড করো
         $imageName = time() . '_' . basename($_FILES['image']['name']);
         $imagePath = '../../assets/uploads/employee/' . $imageName;
 
@@ -45,7 +47,6 @@ try {
         }
     }
 
-    // অন্যান্য তথ্য আপডেট
     $stmt = $pdo->prepare("UPDATE employees 
         SET first_name = ?, last_name = ?, email = ?, phone = ?, address = ?, 
             emergency_name = ?, emergency_phone = ?, emergency_relation = ?, department_id = ? 

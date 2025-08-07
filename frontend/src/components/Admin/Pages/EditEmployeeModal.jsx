@@ -14,28 +14,56 @@ const EditEmployeeModal = ({
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
+  const [formValues, setFormValues] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    address: "",
+    emergency_name: "",
+    emergency_phone: "",
+    emergency_relation: "",
+    department_id: "",
+  });
+
   useEffect(() => {
     if (employee) {
-      setPreviewImage(null);
+      setFormValues({
+        first_name: employee.first_name || "",
+        last_name: employee.last_name || "",
+        email: employee.email || "",
+        phone: employee.phone || "",
+        address: employee.address || "",
+        emergency_name: employee.emergency_name || "",
+        emergency_phone: employee.emergency_phone || "",
+        emergency_relation: employee.emergency_relation || "",
+        department_id: employee.department_id || "",
+      });
       setSelectedImage(null);
-      setStep(1); // reset to step 1 on new employee
+      setPreviewImage(null);
+      setStep(1);
     }
   }, [employee]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
 
     formData.append("id", employee.id);
-    formData.append("first_name", e.target.first_name.value);
-    formData.append("last_name", e.target.last_name.value);
-    formData.append("email", e.target.email.value);
-    formData.append("phone", e.target.phone.value);
-    formData.append("address", e.target.address.value);
-    formData.append("emergency_name", e.target.emergency_name.value);
-    formData.append("emergency_phone", e.target.emergency_phone.value);
-    formData.append("emergency_relation", e.target.emergency_relation.value);
-    formData.append("department_id", e.target.department_id.value);
+    formData.append("first_name", formValues.first_name);
+    formData.append("last_name", formValues.last_name);
+    formData.append("email", formValues.email);
+    formData.append("phone", formValues.phone);
+    formData.append("address", formValues.address);
+    formData.append("emergency_name", formValues.emergency_name);
+    formData.append("emergency_phone", formValues.emergency_phone);
+    formData.append("emergency_relation", formValues.emergency_relation);
+    formData.append("department_id", formValues.department_id);
 
     if (selectedImage) {
       formData.append("image", selectedImage);
@@ -74,7 +102,8 @@ const EditEmployeeModal = ({
                 <Form.Label>First Name</Form.Label>
                 <Form.Control
                   name="first_name"
-                  defaultValue={employee.first_name}
+                  value={formValues.first_name}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -82,7 +111,8 @@ const EditEmployeeModal = ({
                 <Form.Label>Last Name</Form.Label>
                 <Form.Control
                   name="last_name"
-                  defaultValue={employee.last_name}
+                  value={formValues.last_name}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -91,7 +121,8 @@ const EditEmployeeModal = ({
                 <Form.Control
                   name="email"
                   type="email"
-                  defaultValue={employee.email}
+                  value={formValues.email}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -99,7 +130,8 @@ const EditEmployeeModal = ({
                 <Form.Label>Phone</Form.Label>
                 <Form.Control
                   name="phone"
-                  defaultValue={employee.phone}
+                  value={formValues.phone}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -109,7 +141,8 @@ const EditEmployeeModal = ({
                   name="address"
                   as="textarea"
                   rows={2}
-                  defaultValue={employee.address}
+                  value={formValues.address}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -117,7 +150,8 @@ const EditEmployeeModal = ({
                 <Form.Label>Department</Form.Label>
                 <Form.Select
                   name="department_id"
-                  defaultValue={employee.department_id}
+                  value={formValues.department_id}
+                  onChange={handleChange}
                 >
                   <option value="">-- Select Department --</option>
                   {departments.map((dept) => (
@@ -137,7 +171,8 @@ const EditEmployeeModal = ({
                 <Form.Label>Emergency Contact Name</Form.Label>
                 <Form.Control
                   name="emergency_name"
-                  defaultValue={employee.emergency_name}
+                  value={formValues.emergency_name}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -145,7 +180,8 @@ const EditEmployeeModal = ({
                 <Form.Label>Emergency Contact Phone</Form.Label>
                 <Form.Control
                   name="emergency_phone"
-                  defaultValue={employee.emergency_phone}
+                  value={formValues.emergency_phone}
+                  onChange={handleChange}
                 />
               </Form.Group>
 
@@ -153,7 +189,8 @@ const EditEmployeeModal = ({
                 <Form.Label>Emergency Contact Relation</Form.Label>
                 <Form.Control
                   name="emergency_relation"
-                  defaultValue={employee.emergency_relation}
+                  value={formValues.emergency_relation}
+                  onChange={handleChange}
                 />
               </Form.Group>
 

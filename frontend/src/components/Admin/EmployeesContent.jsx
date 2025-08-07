@@ -129,8 +129,8 @@ const EmployeesContent = ({ setShowEmployeeModal }) => {
 
   const filteredEmployees = employees.filter(
     (e) =>
-      e.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.id.toString().includes(searchTerm)
+      (e.first_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      e.id?.toString().includes(searchTerm)
   );
 
   const indexOfLastItem = currentPage * itemsPerPage;

@@ -96,7 +96,6 @@ const TaskAssignment = () => {
     try {
       const formData = new FormData();
       formData.append("group_id", selectedGroup);
-      selectedEmployees.forEach((id) => formData.append("employee_ids[]", id));
       formData.append("task_title", taskTitle);
       formData.append("task_note", taskNote);
       formData.append(
@@ -104,6 +103,7 @@ const TaskAssignment = () => {
         deadline ? deadline.toISOString().split("T")[0] : ""
       );
 
+      selectedEmployees.forEach((id) => formData.append("employee_ids[]", id));
       for (let i = 0; i < taskFiles.length; i++) {
         formData.append("task_files[]", taskFiles[i]);
       }

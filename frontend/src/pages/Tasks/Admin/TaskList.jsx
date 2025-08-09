@@ -28,6 +28,15 @@ const TaskList = () => {
       });
   }, []);
 
+  // Groupby task
+  const groupedTasks = tasks.reduce((acc, task) => {
+    if (!acc[task.group_name]) {
+      acc[task.group_name] = [];
+    }
+    acc[task.group_name].push(task);
+    return acc;
+  }, {});
+
   if (loading) return <Spinner animation="border" variant="primary" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
@@ -40,48 +49,56 @@ const TaskList = () => {
             <th>Title</th>
             <th>Deadline</th>
             <th>Assigned At</th>
-            <th>Group</th>
             <th>Employee</th>
             <th>Email</th>
             <th>Files</th>
           </tr>
         </thead>
         <tbody>
-          {tasks.length > 0 ? (
-            tasks.map((task) => (
-              <tr key={task.task_id}>
-                <td>{task.title}</td>
-                <td>{task.deadline}</td>
-                <td>{task.assigned_at}</td>
-                <td>
-                  <Badge bg="info">{task.group_name}</Badge>
-                </td>
-                <td>{task.employee_name}</td>
-                <td>{task.employee_email}</td>
-                <td>
-                  {task.files.length > 0 ? (
-                    task.files.map((file, index) => (
-                      <div key={index}>
-                        <a
-                          href={`${BASE_URL}backend/assets/uploads/tasks/${file}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          download
-                          className="btn btn-sm btn-primary"
-                        >
-                          Download
-                        </a>
-                      </div>
-                    ))
-                  ) : (
-                    <span>No files</span>
-                  )}
-                </td>
-              </tr>
+          {Object.entries(groupedTasks).length > 0 ? (
+            Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
+              <React.Fragment key={groupName}>
+                <tr>
+                  <td colSpan="6" style={{ backgroundColor: "#d1ecf1" }}>
+                    <Badge bg="" text="black" style={{ fontSize: "1rem" }}>
+                      {groupName} &nbsp;({groupTasks.length} tasks)
+                    </Badge>
+                  </td>
+                </tr>
+
+                {groupTasks.map((task) => (
+                  <tr key={task.task_id}>
+                    <td>{task.title}</td>
+                    <td>{task.deadline}</td>
+                    <td>{task.assigned_at}</td>
+                    <td>{task.employee_name}</td>
+                    <td>{task.employee_email}</td>
+                    <td>
+                      {task.files.length > 0 ? (
+                        task.files.map((file, index) => (
+                          <div key={index}>
+                            <a
+                              href={`${BASE_URL}backend/api/assets/uploads/tasks/${file}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              download
+                              className="btn btn-sm btn-primary"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        ))
+                      ) : (
+                        <span>No files</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </React.Fragment>
             ))
           ) : (
             <tr>
-              <td colSpan="8" className="text-center">
+              <td colSpan="6" className="text-center">
                 No tasks found.
               </td>
             </tr>

@@ -14,7 +14,7 @@ import GroupCreateModal from "../../pages/Groups/GroupCreateModal";
 import GroupEditModal from "../../pages/Groups/GroupEditModal";
 import DepartmentCreateModal from "../../pages/Departments/DepartmentCreateModal";
 import DepartmentEditModal from "../../pages/Departments/DepartmentEditModal";
-// import TaskAssignment from "../../pages/Tasks/TaskAssignment";
+import TaskList from "../../pages/Tasks/Admin/TaskList";
 import "../../assets/css/AdminDashboard.css";
 
 import ErrorBoundary from "../ErrorBoundary";
@@ -176,6 +176,7 @@ const AdminDashboard = () => {
 
           {activeTab === "payroll" && <PayrollContent />}
           {activeTab === "tasks" && <TaskContext />}
+          {activeTab === "taskList" && <TaskList />}
           {activeTab === "settings" && <SettingsContent />}
 
           <EmployeeRegistrationModal

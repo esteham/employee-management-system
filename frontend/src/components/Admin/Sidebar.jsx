@@ -7,6 +7,7 @@ import {
   HouseFill,
   CashStack,
   Building,
+  ListTask ,
   ArrowRightShort,
   ArrowLeftShort,
 } from "react-bootstrap-icons";
@@ -23,6 +24,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: "departments", icon: Building, label: "Departments" },
     { id: "payroll", icon: CashStack, label: "Payroll" },
     { id: "tasks", icon: FolderFill, label: "Tasks" },
+    { id: "taskList", icon: ListTask, label: "Task List"},
     { id: "settings", icon: GearFill, label: "Settings" },
   ];
 
